@@ -60,7 +60,11 @@ export default function App() {
     <div className="min-h-screen bg-cream flex flex-col" style={{ fontFamily: T.fontMono }}>
       {/* Header */}
       <header className="border-b-2 border-border-dark px-6 py-3 flex items-center gap-3 bg-creamy">
-        <span className="text-2xl">🐱</span>
+        <img
+          src="/logo.svg"
+          alt="Pixcat logo"
+          style={{ width: 58, height: 'auto', imageRendering: 'pixelated' }}
+        />
         <div>
           <h1 className="text-xl font-bold tracking-tight text-ink leading-none">Pixcat</h1>
           <p className="text-xs text-muted mt-0.5">image → pixel art → animated gif</p>

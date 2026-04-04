@@ -17,13 +17,21 @@ export default function ExportButton({ frames, fps }) {
     try {
       const GIF = (await import('gif.js')).default
 
+      // Check if any frame uses transparency (PNG with alpha)
+      // Use transparent GIF if any frame was created with removeBg
+      const hasTransparency = frames.some(f => f.hasAlpha)
+
+      // Use magenta (0xFF00FF) as transparent color for GIF when needed
+      const TRANSPARENT_COLOR = 0xFF00FF
+      const TRANSPARENT_RGB = [255, 0, 255]
+
       const gif = new GIF({
         workers: 2,
         quality: 10,
         width: FRAME_SIZE,
         height: FRAME_SIZE,
         workerScript: '/gif.worker.js',
-        transparent: null,
+        transparent: hasTransparency ? TRANSPARENT_COLOR : null,
       })
 
       // Load all frames as images and add to gif
@@ -37,6 +45,11 @@ export default function ExportButton({ frames, fps }) {
         await new Promise((resolve, reject) => {
           const img = new Image()
           img.onload = () => {
+            if (hasTransparency) {
+              // Fill with transparent color first, then draw frame on top
+              ctx.fillStyle = `rgb(${TRANSPARENT_RGB.join(',')})`
+              ctx.fillRect(0, 0, FRAME_SIZE, FRAME_SIZE)
+            }
             ctx.drawImage(img, 0, 0, FRAME_SIZE, FRAME_SIZE)
             resolve()
           }
