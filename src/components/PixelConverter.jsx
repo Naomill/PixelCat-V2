@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { convertToPixelArt, convertToSVG, cropToContent, generateThumbnail } from '../utils/pixelArt.js'
-import { T } from '../ui.js'
 
 const PIXEL_SIZES = [2, 4, 8, 16]
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 
+const BTN_BLUE = '#3550C4'
+const BTN_TEAL = '#3A8FAA'
+
 export default function PixelConverter({ onAddFrame }) {
-  const [image, setImage] = useState(null)         // HTMLImageElement
+  const [image, setImage] = useState(null)
   const [originalDataUrl, setOriginalDataUrl] = useState(null)
   const [convertedDataUrl, setConvertedDataUrl] = useState(null)
   const [pixelSize, setPixelSize] = useState(8)
@@ -18,11 +20,9 @@ export default function PixelConverter({ onAddFrame }) {
   const fileInputRef = useRef(null)
   const dragCounter = useRef(0)
 
-  // Re-convert when controls or image change
   useEffect(() => {
     if (!image) return
     setIsConverting(true)
-    // defer to next tick so UI can update
     const timer = setTimeout(() => {
       try {
         const dataUrl = convertToPixelArt(image, pixelSize, numColors, { removeBg })
@@ -48,7 +48,6 @@ export default function PixelConverter({ onAddFrame }) {
       setError('File too large. Maximum size is 5MB.')
       return
     }
-
     const reader = new FileReader()
     reader.onload = (e) => {
       const dataUrl = e.target.result
@@ -60,7 +59,6 @@ export default function PixelConverter({ onAddFrame }) {
     reader.readAsDataURL(file)
   }, [])
 
-  // Global paste handler — Ctrl+V / Cmd+V anywhere on the page
   useEffect(() => {
     const handlePaste = (e) => {
       const items = e.clipboardData?.items
@@ -68,10 +66,7 @@ export default function PixelConverter({ onAddFrame }) {
       for (const item of items) {
         if (item.type.startsWith('image/')) {
           const file = item.getAsFile()
-          if (file) {
-            e.preventDefault()
-            loadImageFile(file)
-          }
+          if (file) { e.preventDefault(); loadImageFile(file) }
           break
         }
       }
@@ -84,8 +79,7 @@ export default function PixelConverter({ onAddFrame }) {
     e.preventDefault()
     dragCounter.current = 0
     setIsDragging(false)
-    const file = e.dataTransfer.files[0]
-    loadImageFile(file)
+    loadImageFile(e.dataTransfer.files[0])
   }, [loadImageFile])
 
   const handleDragEnter = useCallback((e) => {
@@ -100,13 +94,8 @@ export default function PixelConverter({ onAddFrame }) {
     if (dragCounter.current === 0) setIsDragging(false)
   }, [])
 
-  const handleDragOver = useCallback((e) => {
-    e.preventDefault()
-  }, [])
-
-  const handleFileInput = (e) => {
-    loadImageFile(e.target.files[0])
-  }
+  const handleDragOver = useCallback((e) => { e.preventDefault() }, [])
+  const handleFileInput = (e) => { loadImageFile(e.target.files[0]) }
 
   const handleUseThis = async () => {
     if (!convertedDataUrl) return
@@ -131,9 +120,7 @@ export default function PixelConverter({ onAddFrame }) {
       url = cropToContent(c).toDataURL('image/png')
     }
     const a = document.createElement('a')
-    a.href = url
-    a.download = 'pixcat.png'
-    a.click()
+    a.href = url; a.download = 'pixcat.png'; a.click()
   }
 
   const handleDownloadSVG = () => {
@@ -142,26 +129,21 @@ export default function PixelConverter({ onAddFrame }) {
     const blob = new Blob([svg], { type: 'image/svg+xml' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
-    a.href = url
-    a.download = 'pixcat.svg'
-    a.click()
+    a.href = url; a.download = 'pixcat.svg'; a.click()
     URL.revokeObjectURL(url)
   }
 
   return (
-    <div className="flex flex-col h-full p-4 gap-4">
-      {/* Section title */}
-      <div className="text-xs font-bold tracking-widest uppercase text-muted border-b border-border pb-1">
-        01 — Upload &amp; Convert
-      </div>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: 12, gap: 10 }}>
 
       {/* Upload zone */}
       <div
-        className="relative border-2 border-dashed rounded-pixel cursor-pointer transition-colors"
         style={{
-          borderColor: isDragging ? T.accent : T.border,
-          backgroundColor: isDragging ? '#FFF3EE' : T.creamy,
-          minHeight: '80px',
+          border: `2px dashed ${isDragging ? '#3550C4' : '#C8C4B8'}`,
+          backgroundColor: isDragging ? '#E8EDFF' : '#F5F2EC',
+          cursor: 'pointer',
+          transition: 'border-color 0.15s, background-color 0.15s',
+          padding: '10px 12px',
         }}
         onDrop={handleDrop}
         onDragEnter={handleDragEnter}
@@ -173,124 +155,179 @@ export default function PixelConverter({ onAddFrame }) {
           ref={fileInputRef}
           type="file"
           accept="image/png,image/jpeg,image/webp,image/gif"
-          className="hidden"
+          style={{ display: 'none' }}
           onChange={handleFileInput}
         />
-        <div className="flex items-center justify-center gap-3 px-4 py-3">
-          <span className="text-2xl">{isDragging ? '📂' : '🖼️'}</span>
-          <div>
-            <div className="text-sm font-bold text-ink">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {/* Icon */}
+          <img
+            src={image ? (originalDataUrl || '/DropImgIcon.png') : '/DropImgIcon.png'}
+            alt="drop"
+            style={{
+              width: 52,
+              height: 52,
+              objectFit: 'contain',
+              imageRendering: 'pixelated',
+              flexShrink: 0,
+            }}
+          />
+          {/* Text */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 13, fontWeight: 'bold', color: '#222' }}>
               {image ? 'Drop new image to replace' : 'Drop image here or click to select'}
             </div>
-            <div className="text-xs text-muted mt-0.5">
-              PNG, JPG, WebP, GIF · max 5MB · or{' '}
-              <kbd style={{ fontFamily: T.fontMono, fontSize: '10px', border: `1px solid ${T.border}`, padding: '0 3px', borderRadius: 2 }}>⌘V</kbd> paste
+            <div style={{ fontSize: 11, color: '#6A6A5A', marginTop: 2 }}>
+              PNG, JPG, WebP, GIF (max 5MB) or command+v to paste
             </div>
           </div>
-          {image && (
-            <div className="ml-auto text-xs text-accent font-bold border border-accent px-2 py-1">
-              change
-            </div>
-          )}
+          {/* Button */}
+          <button
+            style={{
+              background: BTN_BLUE,
+              color: 'white',
+              border: 'none',
+              padding: '6px 16px',
+              fontSize: 12,
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              flexShrink: 0,
+              fontFamily: 'inherit',
+            }}
+            onClick={e => { e.stopPropagation(); fileInputRef.current?.click() }}
+          >
+            {image ? 'Change' : 'Upload'}
+          </button>
         </div>
       </div>
 
       {/* Error */}
       {error && (
-        <div className="text-xs text-red-600 border border-red-300 bg-red-50 px-3 py-2">
+        <div style={{ fontSize: 11, color: '#CC2222', border: '1px solid #FFAAAA', background: '#FFF0F0', padding: '4px 8px' }}>
           {error}
         </div>
       )}
 
-      {/* Controls (only when image loaded) */}
+      {/* Controls */}
       {image && (
-        <div className="flex gap-4 flex-wrap">
-          {/* Pixel Size */}
-          <div className="flex flex-col gap-1">
-            <span className="text-xs text-muted tracking-wide uppercase">Pixel Size</span>
-            <div className="flex gap-1">
-              {PIXEL_SIZES.map(size => (
-                <button
-                  key={size}
-                  onClick={() => setPixelSize(size)}
-                  className="px-3 py-1 text-xs font-bold border transition-colors"
-                  style={{
-                    borderColor: pixelSize === size ? T.accent : T.border,
-                    backgroundColor: pixelSize === size ? T.accent : 'transparent',
-                    color: pixelSize === size ? 'white' : T.text,
-                    boxShadow: pixelSize === size ? `2px 2px 0 ${T.accentHover}` : 'none',
-                  }}
-                >
-                  {size}px
-                </button>
-              ))}
+        <div style={{ border: '1px solid #C8C4B8', padding: '8px 12px', background: '#F5F2EC' }}>
+          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+            {/* Pixel Size */}
+            <div>
+              <div style={{ fontSize: 11, color: '#6A6A5A', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Pixel Size</div>
+              <div style={{ display: 'flex', gap: 4 }}>
+                {PIXEL_SIZES.map(size => (
+                  <button
+                    key={size}
+                    onClick={() => setPixelSize(size)}
+                    style={{
+                      padding: '4px 10px',
+                      fontSize: 12,
+                      fontWeight: 'bold',
+                      border: `2px solid ${pixelSize === size ? '#222' : '#C8C4B8'}`,
+                      background: pixelSize === size ? '#333' : 'transparent',
+                      color: pixelSize === size ? 'white' : '#333',
+                      cursor: 'pointer',
+                      fontFamily: 'inherit',
+                    }}
+                  >
+                    {size}px
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
 
-{/* Remove BG */}
-          <div className="flex flex-col gap-1">
-            <span className="text-xs text-muted tracking-wide uppercase">Background</span>
-            <button
-              onClick={() => setRemoveBg(v => !v)}
-              className="px-3 py-1 text-xs font-bold border transition-colors"
-              style={{
-                borderColor: removeBg ? T.accent : T.border,
-                backgroundColor: removeBg ? T.accent : 'transparent',
-                color: removeBg ? 'white' : T.text,
-                boxShadow: removeBg ? `2px 2px 0 ${T.accentHover}` : 'none',
-              }}
-            >
-              Remove BG
-            </button>
+            {/* Remove BG */}
+            <div>
+              <div style={{ fontSize: 11, color: '#6A6A5A', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Background</div>
+              <button
+                onClick={() => setRemoveBg(v => !v)}
+                style={{
+                  padding: '4px 12px',
+                  fontSize: 12,
+                  fontWeight: 'bold',
+                  border: `2px solid ${removeBg ? '#222' : '#C8C4B8'}`,
+                  background: removeBg ? '#333' : 'transparent',
+                  color: removeBg ? 'white' : '#333',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  fontFamily: 'inherit',
+                }}
+              >
+                <span style={{
+                  width: 14, height: 14,
+                  border: '2px solid currentColor',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 10,
+                  flexShrink: 0,
+                }}>
+                  {removeBg ? '✓' : ''}
+                </span>
+                Remove BG
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       {/* Before / After preview */}
       {image && (
-        <div className="flex gap-3 flex-1 min-h-0">
+        <div style={{ display: 'flex', gap: 10, flex: 1, minHeight: 0 }}>
           {/* Before */}
-          <div className="flex-1 flex flex-col gap-1 min-w-0">
-            <span className="text-xs text-muted uppercase tracking-wide">Before</span>
-            <div
-              className="flex-1 border border-border flex items-center justify-center overflow-hidden"
-              style={{ backgroundColor: T.creamy, minHeight: '160px', maxHeight: '280px' }}
-            >
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+            <span style={{ fontSize: 11, color: '#6A6A5A', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Before</span>
+            <div style={{
+              flex: 1,
+              border: '2px solid #C8C4B8',
+              background: '#fff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden',
+              minHeight: 160,
+              maxHeight: 300,
+            }}>
               <img
                 src={originalDataUrl}
                 alt="Original"
-                className="max-w-full max-h-full object-contain"
-                style={{ imageRendering: 'auto' }}
+                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
               />
             </div>
           </div>
 
           {/* After */}
-          <div className="flex-1 flex flex-col gap-1 min-w-0">
-            <span className="text-xs text-muted uppercase tracking-wide">
-              After {removeBg && <span className="text-accent">· transparent</span>}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+            <span style={{ fontSize: 11, color: '#6A6A5A', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              After{removeBg && <span style={{ color: '#3550C4' }}> · transparent</span>}
             </span>
-            <div
-              className="flex-1 border border-border flex items-center justify-center overflow-hidden relative"
-              style={{
-                minHeight: '160px',
-                maxHeight: '280px',
-                backgroundColor: removeBg ? '#fff' : T.creamy,
-                backgroundImage: removeBg
-                  ? 'linear-gradient(45deg,#ccc 25%,transparent 25%),linear-gradient(-45deg,#ccc 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ccc 75%),linear-gradient(-45deg,transparent 75%,#ccc 75%)'
-                  : 'none',
-                backgroundSize: removeBg ? '16px 16px' : 'auto',
-                backgroundPosition: removeBg ? '0 0,0 8px,8px -8px,-8px 0' : 'auto',
-              }}
-            >
+            <div style={{
+              flex: 1,
+              border: '2px solid #C8C4B8',
+              background: removeBg ? '#fff' : '#fff',
+              backgroundImage: removeBg
+                ? 'linear-gradient(45deg,#ccc 25%,transparent 25%),linear-gradient(-45deg,#ccc 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ccc 75%),linear-gradient(-45deg,transparent 75%,#ccc 75%)'
+                : 'none',
+              backgroundSize: removeBg ? '16px 16px' : 'auto',
+              backgroundPosition: removeBg ? '0 0,0 8px,8px -8px,-8px 0' : 'auto',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden',
+              minHeight: 160,
+              maxHeight: 300,
+              position: 'relative',
+            }}>
               {isConverting ? (
-                <div className="text-xs text-muted animate-pulse">converting…</div>
+                <div style={{ fontSize: 11, color: '#999' }}>converting…</div>
               ) : convertedDataUrl ? (
                 <img
                   src={convertedDataUrl}
                   alt="Pixel art"
-                  className="max-w-full max-h-full object-contain pixel-canvas"
-                  style={{ imageRendering: 'pixelated' }}
+                  className="pixel-canvas"
+                  style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', imageRendering: 'pixelated' }}
                 />
               ) : null}
             </div>
@@ -300,88 +337,90 @@ export default function PixelConverter({ onAddFrame }) {
 
       {/* Empty state */}
       {!image && !error && (
-        <div className="flex-1 flex items-center justify-center text-center">
-          <div>
-            <div className="text-5xl mb-3">🐱</div>
-            <div className="text-sm text-muted">Upload an image to get started</div>
-          </div>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 10 }}>
+          <img src="/NoImgContentIcon.png" alt="" style={{ width: 90, imageRendering: 'pixelated', opacity: 0.8 }} />
+          <div style={{ fontSize: 12, color: '#8A8A7A' }}>Upload an image to started!</div>
         </div>
       )}
 
-      {/* Use This button */}
+      {/* Action bar */}
       {convertedDataUrl && !isConverting && (
-        <div className="flex flex-col gap-2">
-          <button
-            onClick={handleUseThis}
-            className="w-full py-3 text-sm font-bold tracking-wide uppercase border-2 transition-colors"
-            style={{
-              borderColor: T.accent,
-              backgroundColor: T.accent,
-              color: 'white',
-              boxShadow: `3px 3px 0 ${T.accentHover}`,
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.backgroundColor = T.accentHover
-              e.currentTarget.style.boxShadow = `1px 1px 0 ${T.accentHover}`
-              e.currentTarget.style.transform = 'translate(2px, 2px)'
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.backgroundColor = T.accent
-              e.currentTarget.style.boxShadow = `3px 3px 0 ${T.accentHover}`
-              e.currentTarget.style.transform = 'none'
-            }}
-          >
-            + Use This Frame
-          </button>
+        <div style={{
+          display: 'flex',
+          gap: 0,
+          borderTop: '1px solid #C8C4B8',
+          paddingTop: 10,
+          marginTop: 4,
+        }}>
+          {/* Left: Download */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6, paddingRight: 10, borderRight: '1px solid #C8C4B8' }}>
+            <div style={{ fontSize: 11, color: '#6A6A5A', fontWeight: 'bold' }}>Download pixel image</div>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <button
+                onClick={handleDownloadPNG}
+                style={{
+                  flex: 1,
+                  background: BTN_TEAL,
+                  color: 'white',
+                  border: 'none',
+                  padding: '7px 8px',
+                  fontSize: 12,
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 5,
+                  fontFamily: 'inherit',
+                }}
+              >
+                ↓ Save as PNG
+              </button>
+              <button
+                onClick={handleDownloadSVG}
+                style={{
+                  flex: 1,
+                  background: BTN_TEAL,
+                  color: 'white',
+                  border: 'none',
+                  padding: '7px 8px',
+                  fontSize: 12,
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 5,
+                  fontFamily: 'inherit',
+                }}
+              >
+                ↓ Save as SVG
+              </button>
+            </div>
+          </div>
 
-          <div className="flex gap-2">
+          {/* Right: Add frame */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 10 }}>
+            <div style={{ fontSize: 11, color: '#6A6A5A', fontWeight: 'bold' }}>Add frame to make animation</div>
             <button
-              onClick={handleDownloadPNG}
-              className="flex-1 py-2 text-xs font-bold tracking-wide uppercase border transition-colors"
+              onClick={handleUseThis}
               style={{
-                borderColor: T.blue,
-                backgroundColor: 'transparent',
-                color: T.blue,
-                boxShadow: `2px 2px 0 #2A70B9`,
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.backgroundColor = T.blue
-                e.currentTarget.style.color = 'white'
-                e.currentTarget.style.boxShadow = `1px 1px 0 #2A70B9`
-                e.currentTarget.style.transform = 'translate(1px, 1px)'
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.backgroundColor = 'transparent'
-                e.currentTarget.style.color = T.blue
-                e.currentTarget.style.boxShadow = `2px 2px 0 #2A70B9`
-                e.currentTarget.style.transform = 'none'
+                background: BTN_BLUE,
+                color: 'white',
+                border: 'none',
+                padding: '7px 12px',
+                fontSize: 12,
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                width: '100%',
+                fontFamily: 'inherit',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 4,
               }}
             >
-              ↓ PNG
-            </button>
-            <button
-              onClick={handleDownloadSVG}
-              className="flex-1 py-2 text-xs font-bold tracking-wide uppercase border transition-colors"
-              style={{
-                borderColor: T.green,
-                backgroundColor: 'transparent',
-                color: T.green,
-                boxShadow: `2px 2px 0 #2A8F57`,
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.backgroundColor = T.green
-                e.currentTarget.style.color = 'white'
-                e.currentTarget.style.boxShadow = `1px 1px 0 #2A8F57`
-                e.currentTarget.style.transform = 'translate(1px, 1px)'
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.backgroundColor = 'transparent'
-                e.currentTarget.style.color = T.green
-                e.currentTarget.style.boxShadow = `2px 2px 0 #2A8F57`
-                e.currentTarget.style.transform = 'none'
-              }}
-            >
-              ↓ SVG
+              + Use this frame
             </button>
           </div>
         </div>

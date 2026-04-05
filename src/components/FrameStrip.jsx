@@ -1,5 +1,4 @@
 import { useRef, useState } from 'react'
-import { T } from '../ui.js'
 
 export default function FrameStrip({ frames, activeIdx, onSelect, onRemove, onReorder, onDuplicate }) {
   const dragFromIdx = useRef(null)
@@ -21,9 +20,7 @@ export default function FrameStrip({ frames, activeIdx, onSelect, onRemove, onRe
     e.preventDefault()
     const fromIdx = dragFromIdx.current
     setDragOverIdx(null)
-    if (fromIdx !== null && fromIdx !== toIdx) {
-      onReorder(fromIdx, toIdx)
-    }
+    if (fromIdx !== null && fromIdx !== toIdx) onReorder(fromIdx, toIdx)
     dragFromIdx.current = null
   }
 
@@ -32,10 +29,16 @@ export default function FrameStrip({ frames, activeIdx, onSelect, onRemove, onRe
     dragFromIdx.current = null
   }
 
-  return (
-    <div className="px-4 py-2 flex items-center gap-2 overflow-x-auto">
-      <span className="text-xs text-muted uppercase tracking-widest shrink-0 mr-2">Frames</span>
+  if (frames.length === 0) {
+    return (
+      <div style={{ fontSize: 11, color: '#8A8A7A', padding: '4px 0' }}>
+        No frames yet
+      </div>
+    )
+  }
 
+  return (
+    <div style={{ display: 'flex', gap: 4, overflowX: 'auto', paddingBottom: 2 }}>
       {frames.map((frame, idx) => (
         <div
           key={frame.id}
@@ -44,54 +47,68 @@ export default function FrameStrip({ frames, activeIdx, onSelect, onRemove, onRe
           onDragOver={e => handleDragOver(e, idx)}
           onDrop={e => handleDrop(e, idx)}
           onDragEnd={handleDragEnd}
-          className="relative shrink-0 cursor-pointer select-none"
-          style={{
-            border: activeIdx === idx ? `2px solid ${T.accent}` : `2px solid ${T.border}`,
-            boxShadow: dragOverIdx === idx ? `3px 3px 0 ${T.accent}` : activeIdx === idx ? `2px 2px 0 ${T.accentHover}` : '2px 2px 0 #C8C4B8',
-            opacity: dragFromIdx.current === idx ? 0.4 : 1,
-            transition: 'transform 0.1s',
-          }}
           onClick={() => onSelect(idx)}
+          style={{
+            position: 'relative',
+            flexShrink: 0,
+            cursor: 'pointer',
+            border: activeIdx === idx ? '2px solid #3550C4' : '2px solid #C8C4B8',
+            boxShadow: dragOverIdx === idx ? '0 0 0 2px #3550C4' : 'none',
+            opacity: dragFromIdx.current === idx ? 0.4 : 1,
+          }}
         >
-          {/* Frame thumbnail */}
           <img
             src={frame.thumbnail}
             alt={`Frame ${idx + 1}`}
-            width={64}
-            height={64}
-            className="block pixel-canvas"
+            width={56}
+            height={56}
+            className="pixel-canvas"
             draggable={false}
+            style={{ display: 'block' }}
           />
 
-          {/* Frame number badge */}
-          <div
-            className="absolute top-0 left-0 text-xs px-1 leading-none"
-            style={{
-              backgroundColor: activeIdx === idx ? T.accent : T.borderDark,
-              color: 'white',
-              fontSize: '9px',
-              lineHeight: '14px',
-            }}
-          >
+          {/* Number badge */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            background: activeIdx === idx ? '#3550C4' : '#555',
+            color: 'white',
+            fontSize: 9,
+            lineHeight: '14px',
+            padding: '0 3px',
+          }}>
             {idx + 1}
           </div>
 
-          {/* Controls on hover */}
+          {/* Hover controls */}
           <div
-            className="absolute inset-0 flex flex-col items-center justify-center gap-1 opacity-0 hover:opacity-100 transition-opacity"
-            style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(0,0,0,0.55)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 2,
+              opacity: 0,
+              transition: 'opacity 0.15s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.opacity = 1}
+            onMouseLeave={e => e.currentTarget.style.opacity = 0}
           >
             <button
               title="Duplicate"
-              className="text-white text-xs px-1 hover:text-yellow-300"
               onClick={e => { e.stopPropagation(); onDuplicate(idx) }}
+              style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: 14, padding: 0 }}
             >
               ⧉
             </button>
             <button
               title="Remove"
-              className="text-white text-xs px-1 hover:text-red-300"
               onClick={e => { e.stopPropagation(); onRemove(idx) }}
+              style={{ background: 'none', border: 'none', color: '#FF9999', cursor: 'pointer', fontSize: 12, padding: 0 }}
             >
               ✕
             </button>
@@ -99,9 +116,19 @@ export default function FrameStrip({ frames, activeIdx, onSelect, onRemove, onRe
         </div>
       ))}
 
-      {frames.length === 0 && (
-        <div className="text-xs text-muted italic">No frames yet — convert an image and click "Use This Frame"</div>
-      )}
+      {/* Empty slots placeholder */}
+      {[...Array(Math.max(0, 4 - frames.length))].map((_, i) => (
+        <div
+          key={`empty-${i}`}
+          style={{
+            width: 60,
+            height: 60,
+            border: '2px solid #C8C4B8',
+            background: '#F0EDE6',
+            flexShrink: 0,
+          }}
+        />
+      ))}
     </div>
   )
 }

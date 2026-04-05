@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { T } from '../ui.js'
 
 const FRAME_SIZE = T.FRAME_SIZE
+const BTN_BLUE = '#3550C4'
 
 export default function ExportButton({ frames, fps }) {
   const [isExporting, setIsExporting] = useState(false)
@@ -16,12 +17,7 @@ export default function ExportButton({ frames, fps }) {
 
     try {
       const GIF = (await import('gif.js')).default
-
-      // Check if any frame uses transparency (PNG with alpha)
-      // Use transparent GIF if any frame was created with removeBg
       const hasTransparency = frames.some(f => f.hasAlpha)
-
-      // Use magenta (0xFF00FF) as transparent color for GIF when needed
       const TRANSPARENT_COLOR = 0xFF00FF
       const TRANSPARENT_RGB = [255, 0, 255]
 
@@ -34,7 +30,6 @@ export default function ExportButton({ frames, fps }) {
         transparent: hasTransparency ? TRANSPARENT_COLOR : null,
       })
 
-      // Load all frames as images and add to gif
       for (const frame of frames) {
         const canvas = document.createElement('canvas')
         canvas.width = FRAME_SIZE
@@ -46,7 +41,6 @@ export default function ExportButton({ frames, fps }) {
           const img = new Image()
           img.onload = () => {
             if (hasTransparency) {
-              // Fill with transparent color first, then draw frame on top
               ctx.fillStyle = `rgb(${TRANSPARENT_RGB.join(',')})`
               ctx.fillRect(0, 0, FRAME_SIZE, FRAME_SIZE)
             }
@@ -60,9 +54,7 @@ export default function ExportButton({ frames, fps }) {
         gif.addFrame(canvas, { delay: Math.round(1000 / fps), copy: true })
       }
 
-      gif.on('progress', (p) => {
-        setProgress(Math.round(p * 100))
-      })
+      gif.on('progress', (p) => setProgress(Math.round(p * 100)))
 
       gif.on('finished', (blob) => {
         const url = URL.createObjectURL(blob)
@@ -87,56 +79,44 @@ export default function ExportButton({ frames, fps }) {
   const disabled = frames.length === 0 || isExporting
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="text-xs font-bold tracking-widest uppercase text-muted border-b border-border pb-1">
-        03 — Export
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ fontSize: 11, fontWeight: 'bold', color: '#6A6A5A' }}>
+        Download your GIF here!
       </div>
 
       <button
         onClick={handleExport}
         disabled={disabled}
-        className="w-full py-2.5 text-sm font-bold tracking-wide uppercase border-2 transition-all"
         style={{
-          borderColor: disabled ? T.border : T.green,
-          backgroundColor: disabled ? T.creamy : T.green,
-          color: disabled ? T.textMuted : 'white',
-          boxShadow: disabled ? 'none' : `3px 3px 0 #2A8F57`,
+          width: '100%',
+          padding: '8px 12px',
+          background: disabled ? '#C8C4B8' : BTN_BLUE,
+          color: 'white',
+          border: 'none',
+          fontSize: 13,
+          fontWeight: 'bold',
           cursor: disabled ? 'not-allowed' : 'pointer',
-        }}
-        onMouseEnter={e => {
-          if (!disabled) {
-            e.currentTarget.style.transform = 'translate(2px, 2px)'
-            e.currentTarget.style.boxShadow = `1px 1px 0 #2A8F57`
-          }
-        }}
-        onMouseLeave={e => {
-          if (!disabled) {
-            e.currentTarget.style.transform = 'none'
-            e.currentTarget.style.boxShadow = `3px 3px 0 #2A8F57`
-          }
+          fontFamily: 'inherit',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 6,
+          opacity: disabled ? 0.7 : 1,
         }}
       >
-        {isExporting ? `Encoding… ${progress}%` : `Export GIF (${frames.length} frame${frames.length !== 1 ? 's' : ''})`}
+        ↓ {isExporting ? `Encoding… ${progress}%` : `Export GIF`}
       </button>
 
-      {/* Progress bar */}
       {isExporting && (
-        <div className="w-full h-2 border border-border overflow-hidden" style={{ backgroundColor: T.creamy }}>
-          <div
-            className="h-full transition-all"
-            style={{ width: `${progress}%`, backgroundColor: T.green }}
-          />
+        <div style={{ width: '100%', height: 6, background: '#E0DCCC', border: '1px solid #C8C4B8', overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: `${progress}%`, background: BTN_BLUE, transition: 'width 0.2s' }} />
         </div>
       )}
 
       {error && (
-        <div className="text-xs text-red-600 border border-red-300 bg-red-50 px-2 py-1">
+        <div style={{ fontSize: 11, color: '#CC2222', border: '1px solid #FFAAAA', background: '#FFF0F0', padding: '3px 6px' }}>
           {error}
         </div>
-      )}
-
-      {frames.length === 0 && (
-        <div className="text-xs text-muted">Add at least one frame to export</div>
       )}
     </div>
   )

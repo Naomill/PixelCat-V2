@@ -3,7 +3,64 @@ import PixelConverter from './components/PixelConverter.jsx'
 import FrameStrip from './components/FrameStrip.jsx'
 import AnimationPreview from './components/AnimationPreview.jsx'
 import ExportButton from './components/ExportButton.jsx'
-import { T } from './ui.js'
+
+const WIN_BLUE = 'linear-gradient(to bottom, #4A6FD8 0%, #3550C4 100%)'
+const WIN_BG = '#EDE8DC'
+
+function Win98Window({ title, children, className = '', contentStyle = {}, style = {} }) {
+  return (
+    <div
+      className={`flex flex-col ${className}`}
+      style={{
+        border: '3px solid #000',
+        boxShadow: '4px 4px 0 rgba(0,0,0,0.35)',
+        minHeight: 0,
+        overflow: 'hidden',
+        ...style,
+      }}
+    >
+      {/* Title bar */}
+      <div
+        style={{
+          background: WIN_BLUE,
+          padding: '5px 8px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexShrink: 0,
+          userSelect: 'none',
+        }}
+      >
+        <span style={{ color: 'white', fontWeight: 'bold', fontSize: '13px', letterSpacing: '0.02em' }}>
+          {title}
+        </span>
+        <button
+          style={{
+            background: '#CC2233',
+            color: 'white',
+            border: '1px solid #AA1122',
+            width: 22,
+            height: 20,
+            fontSize: '12px',
+            cursor: 'pointer',
+            fontWeight: 'bold',
+            lineHeight: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          ✕
+        </button>
+      </div>
+      {/* Content */}
+      <div style={{ flex: 1, overflow: 'auto', backgroundColor: WIN_BG, ...contentStyle }}>
+        {children}
+      </div>
+    </div>
+  )
+}
 
 const initialState = {
   frames: [],
@@ -57,61 +114,77 @@ export default function App() {
   const handleDuplicate = (index) => dispatch({ type: 'DUPLICATE_FRAME', index })
 
   return (
-    <div className="min-h-screen bg-cream flex flex-col" style={{ fontFamily: T.fontMono }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'LINESeedSansTH', 'Courier New', sans-serif" }}>
       {/* Header */}
-      <header className="border-b-2 border-border-dark px-6 py-3 flex items-center gap-3 bg-creamy">
-        <img
-          src="/logo.svg"
-          alt="Pixcat logo"
-          style={{ width: 58, height: 'auto', imageRendering: 'pixelated' }}
-        />
-        <div>
-          <h1 className="text-xl font-bold tracking-tight text-ink leading-none">Pixcat</h1>
-          <p className="text-xs text-muted mt-0.5">image → pixel art → animated gif</p>
-        </div>
-        <div className="ml-auto flex items-center gap-2">
-          {frames.length > 0 && (
-            <span className="text-xs text-muted border border-border px-2 py-1">
-              {frames.length} frame{frames.length !== 1 ? 's' : ''}
-            </span>
-          )}
+      <header style={{ textAlign: 'center', padding: '20px 16px 12px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+          <img
+            src="/logo.svg"
+            alt="PixelCat"
+            style={{ width: 52, height: 'auto', imageRendering: 'pixelated' }}
+          />
+          <div style={{ textAlign: 'left' }}>
+            <div style={{ fontSize: 28, fontWeight: 'bold', color: '#111', lineHeight: 1 }}>
+              PixelCat
+            </div>
+            <div style={{ fontSize: 13, color: '#333', marginTop: 2 }}>
+              Image Pixel Convertor
+            </div>
+          </div>
         </div>
       </header>
 
-      {/* Main content */}
-      <main className="flex-1 flex flex-col lg:flex-row gap-0">
-        {/* Left: Converter */}
-        <div className="flex-1 border-b lg:border-b-0 lg:border-r-2 border-border-dark">
+      {/* Main windows */}
+      <main
+        style={{
+          flex: 1,
+          display: 'flex',
+          gap: 16,
+          padding: '0 16px 20px',
+          alignItems: 'stretch',
+          maxWidth: 1400,
+          width: '100%',
+          margin: '0 auto',
+          boxSizing: 'border-box',
+        }}
+      >
+        {/* Left window — Upload & Convert */}
+        <Win98Window title="Upload and Convert" className="flex-1" contentStyle={{ display: 'flex', flexDirection: 'column' }}>
           <PixelConverter onAddFrame={handleAddFrame} />
-        </div>
+        </Win98Window>
 
-        {/* Right: Preview + Controls */}
-        <div className="w-full lg:w-[420px] flex flex-col">
-          {/* Animation Preview */}
-          <div className="flex-1 border-b border-border-dark">
-            <AnimationPreview frames={frames} fps={fps} onSetFps={handleSetFps} />
-          </div>
+        {/* Right window — Preview & Export */}
+        <Win98Window
+          title="Preview Animation"
+          contentStyle={{ display: 'flex', flexDirection: 'column' }}
+          style={{ width: 420, flexShrink: 0 }}
+        >
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+            {/* Animation preview */}
+            <AnimationPreview frames={frames} fps={fps} onSetFps={handleSetFps} activeIdx={activeFrameIdx} />
 
-          {/* Export */}
-          <div className="border-b border-border-dark px-4 py-3">
-            <ExportButton frames={frames} fps={fps} />
+            {/* Frame strip */}
+            <div style={{ borderTop: '1px solid #C8C4B8', padding: '8px 12px' }}>
+              <div style={{ fontSize: 11, fontWeight: 'bold', color: '#6A6A5A', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>
+                Frame
+              </div>
+              <FrameStrip
+                frames={frames}
+                activeIdx={activeFrameIdx}
+                onSelect={handleSelectFrame}
+                onRemove={handleRemoveFrame}
+                onReorder={handleReorder}
+                onDuplicate={handleDuplicate}
+              />
+            </div>
+
+            {/* Export */}
+            <div style={{ borderTop: '1px solid #C8C4B8', padding: '10px 12px' }}>
+              <ExportButton frames={frames} fps={fps} />
+            </div>
           </div>
-        </div>
+        </Win98Window>
       </main>
-
-      {/* Frame Strip */}
-      {frames.length > 0 && (
-        <div className="border-t-2 border-border-dark bg-creamy">
-          <FrameStrip
-            frames={frames}
-            activeIdx={activeFrameIdx}
-            onSelect={handleSelectFrame}
-            onRemove={handleRemoveFrame}
-            onReorder={handleReorder}
-            onDuplicate={handleDuplicate}
-          />
-        </div>
-      )}
     </div>
   )
 }

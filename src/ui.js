@@ -14,7 +14,7 @@ export const T = {
   red: '#D94A4A',
 
   // Typography
-  fontMono: '"Courier New", Courier, monospace',
+  fontMono: "'LINESeedSansTH', 'Courier New', sans-serif",
 
   // Borders
   borderStyle: '1.5px solid #C8C4B8',

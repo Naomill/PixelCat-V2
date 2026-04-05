@@ -2,15 +2,58 @@
 @tailwind components;
 @tailwind utilities;
 
+/* LINE Seed Sans TH — วางไฟล์ .woff2 ใน public/fonts/ */
+@font-face {
+  font-family: 'LINESeedSansTH';
+  src: url('/fonts/LINESeedSansTH_W_Th.woff') format('woff');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'LINESeedSansTH';
+  src: url('/fonts/LINESeedSansTH_W_Rg.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'LINESeedSansTH';
+  src: url('/fonts/LINESeedSansTH_W_Bd.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'LINESeedSansTH';
+  src: url('/fonts/LINESeedSansTH_W_XBd.woff') format('woff');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'LINESeedSansTH';
+  src: url('/fonts/LINESeedSansTH_W_He.woff') format('woff');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  font-family: "Courier New", Courier, monospace;
-  background-color: #F5F0E8;
+  font-family: 'LINESeedSansTH', 'Courier New', Courier, monospace;
+  background-color: #7abfff;
   color: #2A2A24;
+  min-height: 100vh;
+  background-image: url('/background.svg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 .pixel-canvas {
@@ -18,6 +61,21 @@ body {
   image-rendering: crisp-edges;
   image-rendering: -moz-crisp-edges;
   image-rendering: -webkit-optimize-contrast;
+}
+
+/* Win98-style inset border */
+.win-inset {
+  border-top: 2px solid #888;
+  border-left: 2px solid #888;
+  border-bottom: 2px solid #fff;
+  border-right: 2px solid #fff;
+}
+
+.win-outset {
+  border-top: 2px solid #fff;
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #888;
+  border-right: 2px solid #888;
 }
 
 /* Scrollbar styling */
