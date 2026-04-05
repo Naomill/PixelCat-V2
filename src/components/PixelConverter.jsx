@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faDownload, faPlus, faCheck, faUpload } from '@fortawesome/free-solid-svg-icons'
 import { convertToPixelArt, convertToSVG, cropToContent, generateThumbnail } from '../utils/pixelArt.js'
 
 const PIXEL_SIZES = [2, 4, 8, 16]
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 
-const BTN_BLUE = '#3550C4'
-const BTN_TEAL = '#3A8FAA'
 
 export default function PixelConverter({ onAddFrame }) {
   const [image, setImage] = useState(null)
@@ -143,7 +143,7 @@ export default function PixelConverter({ onAddFrame }) {
           backgroundColor: isDragging ? '#E8EDFF' : '#F5F2EC',
           cursor: 'pointer',
           transition: 'border-color 0.15s, background-color 0.15s',
-          padding: '10px 12px',
+          padding: '16px 12px',
         }}
         onDrop={handleDrop}
         onDragEnter={handleDragEnter}
@@ -182,19 +182,11 @@ export default function PixelConverter({ onAddFrame }) {
           </div>
           {/* Button */}
           <button
-            style={{
-              background: BTN_BLUE,
-              color: 'white',
-              border: 'none',
-              padding: '6px 16px',
-              fontSize: 12,
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              flexShrink: 0,
-              fontFamily: 'inherit',
-            }}
+            className="btn-pixel-primary"
+            style={{ padding: '6px 16px', fontSize: 12, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6 }}
             onClick={e => { e.stopPropagation(); fileInputRef.current?.click() }}
           >
+            <FontAwesomeIcon icon={faUpload} />
             {image ? 'Change' : 'Upload'}
           </button>
         </div>
@@ -209,26 +201,18 @@ export default function PixelConverter({ onAddFrame }) {
 
       {/* Controls */}
       {image && (
-        <div style={{ border: '1px solid #C8C4B8', padding: '8px 12px', background: '#F5F2EC' }}>
+        <div style={{ border: '2px solid #C8C4B8', padding: '16px 12px', background: '#F5F2EC' }}>
           <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
             {/* Pixel Size */}
             <div>
               <div style={{ fontSize: 11, color: '#6A6A5A', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Pixel Size</div>
-              <div style={{ display: 'flex', gap: 4 }}>
+              <div style={{ display: 'flex', gap: 8 }}>
                 {PIXEL_SIZES.map(size => (
                   <button
                     key={size}
                     onClick={() => setPixelSize(size)}
-                    style={{
-                      padding: '4px 10px',
-                      fontSize: 12,
-                      fontWeight: 'bold',
-                      border: `2px solid ${pixelSize === size ? '#222' : '#C8C4B8'}`,
-                      background: pixelSize === size ? '#333' : 'transparent',
-                      color: pixelSize === size ? 'white' : '#333',
-                      cursor: 'pointer',
-                      fontFamily: 'inherit',
-                    }}
+                    className={pixelSize === size ? 'btn-pixel-active' : 'btn-pixel'}
+                    style={{ padding: '6px 10px', fontSize: 12 }}
                   >
                     {size}px
                   </button>
@@ -241,19 +225,8 @@ export default function PixelConverter({ onAddFrame }) {
               <div style={{ fontSize: 11, color: '#6A6A5A', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Background</div>
               <button
                 onClick={() => setRemoveBg(v => !v)}
-                style={{
-                  padding: '4px 12px',
-                  fontSize: 12,
-                  fontWeight: 'bold',
-                  border: `2px solid ${removeBg ? '#222' : '#C8C4B8'}`,
-                  background: removeBg ? '#333' : 'transparent',
-                  color: removeBg ? 'white' : '#333',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  fontFamily: 'inherit',
-                }}
+                className={removeBg ? 'btn-pixel-active' : 'btn-pixel'}
+                style={{ padding: '6px 12px', fontSize: 12, display: 'flex', alignItems: 'center', gap: 6 }}
               >
                 <span style={{
                   width: 14, height: 14,
@@ -261,10 +234,10 @@ export default function PixelConverter({ onAddFrame }) {
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: 10,
+                  fontSize: 9,
                   flexShrink: 0,
                 }}>
-                  {removeBg ? '✓' : ''}
+                  {removeBg ? <FontAwesomeIcon icon={faCheck} /> : ''}
                 </span>
                 Remove BG
               </button>
@@ -353,48 +326,22 @@ export default function PixelConverter({ onAddFrame }) {
           marginTop: 4,
         }}>
           {/* Left: Download */}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6, paddingRight: 10, borderRight: '1px solid #C8C4B8' }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6, paddingRight: 10 }}>
             <div style={{ fontSize: 11, color: '#6A6A5A', fontWeight: 'bold' }}>Download pixel image</div>
             <div style={{ display: 'flex', gap: 6 }}>
               <button
                 onClick={handleDownloadPNG}
-                style={{
-                  flex: 1,
-                  background: BTN_TEAL,
-                  color: 'white',
-                  border: 'none',
-                  padding: '7px 8px',
-                  fontSize: 12,
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 5,
-                  fontFamily: 'inherit',
-                }}
+                className="btn-pixel"
+                style={{ flex: 1, padding: '7px 8px', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}
               >
-                ↓ Save as PNG
+                <FontAwesomeIcon icon={faDownload} /> Save as PNG
               </button>
               <button
                 onClick={handleDownloadSVG}
-                style={{
-                  flex: 1,
-                  background: BTN_TEAL,
-                  color: 'white',
-                  border: 'none',
-                  padding: '7px 8px',
-                  fontSize: 12,
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 5,
-                  fontFamily: 'inherit',
-                }}
+                className="btn-pixel"
+                style={{ flex: 1, padding: '7px 8px', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}
               >
-                ↓ Save as SVG
+                <FontAwesomeIcon icon={faDownload} /> Save as SVG
               </button>
             </div>
           </div>
@@ -404,23 +351,10 @@ export default function PixelConverter({ onAddFrame }) {
             <div style={{ fontSize: 11, color: '#6A6A5A', fontWeight: 'bold' }}>Add frame to make animation</div>
             <button
               onClick={handleUseThis}
-              style={{
-                background: BTN_BLUE,
-                color: 'white',
-                border: 'none',
-                padding: '7px 12px',
-                fontSize: 12,
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                width: '100%',
-                fontFamily: 'inherit',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 4,
-              }}
+              className="btn-pixel-primary"
+              style={{ padding: '8px 12px', fontSize: 12, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}
             >
-              + Use this frame
+              <FontAwesomeIcon icon={faPlus} /> Use this frame
             </button>
           </div>
         </div>

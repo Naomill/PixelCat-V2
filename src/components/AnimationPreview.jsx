@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons'
 
 const FPS_OPTIONS = [4, 8, 12, 24]
 
@@ -20,6 +22,28 @@ export default function AnimationPreview({ frames, fps, onSetFps }) {
 
   const currentFrame = frames.length > 0 ? frames[Math.min(currentIdx, frames.length - 1)] : null
 
+  // Empty state — no frames yet
+  if (frames.length === 0) {
+    return (
+      <div style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 12,
+        padding: 24,
+      }}>
+        <img
+          src="/NoFrameContentIcon.png"
+          alt=""
+          style={{ width: 52, imageRendering: 'pixelated' }}
+        />
+        <div style={{ fontSize: 13, color: '#8A8A7A' }}>Add frames to preview animation</div>
+      </div>
+    )
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
       {/* Preview area */}
@@ -38,79 +62,46 @@ export default function AnimationPreview({ frames, fps, onSetFps }) {
           overflow: 'hidden',
         }}
       >
-        {currentFrame ? (
-          <img
-            src={currentFrame.dataUrl}
-            alt={`Frame ${currentIdx + 1}`}
-            className="pixel-canvas"
-            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', imageRendering: 'pixelated' }}
-          />
-        ) : (
-          <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-            <img
-              src="/NoFrameContentIcon.png"
-              alt=""
-              style={{ width: 80, imageRendering: 'pixelated', opacity: 0.85 }}
-            />
-            <div style={{ fontSize: 12, color: '#8A8A7A' }}>Add frames to preview animation</div>
-          </div>
-        )}
+        <img
+          src={currentFrame.dataUrl}
+          alt={`Frame ${currentIdx + 1}`}
+          className="pixel-canvas"
+          style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', imageRendering: 'pixelated' }}
+        />
 
         {/* Frame counter */}
-        {frames.length > 0 && (
-          <div style={{
-            position: 'absolute',
-            bottom: 6,
-            right: 8,
-            fontSize: 11,
-            color: '#888',
-            background: 'rgba(255,255,255,0.85)',
-            padding: '1px 6px',
-            border: '1px solid #ccc',
-          }}>
-            {currentIdx + 1} / {frames.length}
-          </div>
-        )}
+        <div style={{
+          position: 'absolute',
+          bottom: 6,
+          right: 8,
+          fontSize: 11,
+          color: '#888',
+          background: 'rgba(255,255,255,0.85)',
+          padding: '1px 6px',
+          border: '1px solid #ccc',
+        }}>
+          {currentIdx + 1} / {frames.length}
+        </div>
       </div>
 
       {/* FPS controls */}
       <div style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         <span style={{ fontSize: 11, fontWeight: 'bold', color: '#6A6A5A', textTransform: 'uppercase', letterSpacing: '0.06em', marginRight: 4 }}>FPS</span>
 
-        {/* Play/Pause */}
         <button
           onClick={() => setIsPlaying(p => !p)}
-          style={{
-            padding: '4px 10px',
-            fontSize: 12,
-            fontWeight: 'bold',
-            border: '2px solid #C8C4B8',
-            background: isPlaying ? '#555' : 'transparent',
-            color: isPlaying ? 'white' : '#333',
-            cursor: 'pointer',
-            fontFamily: 'inherit',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 4,
-          }}
+          className={isPlaying ? 'btn-pixel-active' : 'btn-pixel'}
+          style={{ padding: '4px 10px', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}
         >
-          {isPlaying ? '⏸' : '▶'} {isPlaying ? 'Pause' : 'Play'}
+          <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} /> {isPlaying ? 'Pause' : 'Play'}
         </button>
 
         {FPS_OPTIONS.map(f => (
           <button
             key={f}
             onClick={() => onSetFps(f)}
-            style={{
-              padding: '4px 10px',
-              fontSize: 12,
-              fontWeight: 'bold',
-              border: `2px solid ${fps === f ? '#222' : '#C8C4B8'}`,
-              background: fps === f ? '#333' : 'transparent',
-              color: fps === f ? 'white' : '#333',
-              cursor: 'pointer',
-              fontFamily: 'inherit',
-            }}
+            className={fps === f ? 'btn-pixel-active' : 'btn-pixel'}
+            style={{ padding: '4px 10px', fontSize: 12 }}
           >
             {f}
           </button>

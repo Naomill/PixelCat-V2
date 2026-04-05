@@ -63,6 +63,70 @@ body {
   image-rendering: -webkit-optimize-contrast;
 }
 
+/* Pixel button — default + hover/active shadow */
+.btn-pixel {
+  border: 2px solid #222;
+  background: #fff;
+  color: #222;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: bold;
+  transition: box-shadow 0.08s, transform 0.08s;
+  box-shadow: none;
+  user-select: none;
+}
+.btn-pixel:hover,
+.btn-pixel:focus-visible {
+  box-shadow: 3px 3px 0 #222;
+  outline: none;
+}
+.btn-pixel:active {
+  box-shadow: 2px 2px 0 #222;
+  transform: translate(2px, 2px);
+}
+
+.btn-pixel-active {
+  border: 2px solid #222;
+  background: #fff;
+  color: #222;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: bold;
+  box-shadow: 3px 3px 0 #222;
+  user-select: none;
+}
+.btn-pixel-active:active {
+  box-shadow: 2px 2px 0 #222;
+  transform: translate(2px, 2px);
+}
+
+.btn-pixel-primary {
+  border: none;
+  background: #3550C4;
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: bold;
+  transition: box-shadow 0.08s, transform 0.08s;
+  box-shadow: none;
+  user-select: none;
+}
+.btn-pixel-primary:hover,
+.btn-pixel-primary:focus-visible {
+  box-shadow: 4px 4px 0 #1a2f8a;
+  outline: none;
+}
+.btn-pixel-primary:active {
+  box-shadow: 2px 2px 0 #1a2f8a;
+  transform: translate(2px, 2px);
+}
+.btn-pixel-primary:disabled {
+  background: #C8C4B8;
+  color: #fff;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
 /* Win98-style inset border */
 .win-inset {
   border-top: 2px solid #888;

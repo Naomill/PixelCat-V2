@@ -1,4 +1,6 @@
 import { useRef, useState } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCopy, faXmark } from '@fortawesome/free-solid-svg-icons'
 
 export default function FrameStrip({ frames, activeIdx, onSelect, onRemove, onReorder, onDuplicate }) {
   const dragFromIdx = useRef(null)
@@ -101,16 +103,16 @@ export default function FrameStrip({ frames, activeIdx, onSelect, onRemove, onRe
             <button
               title="Duplicate"
               onClick={e => { e.stopPropagation(); onDuplicate(idx) }}
-              style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: 14, padding: 0 }}
+              style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: 13, padding: 0 }}
             >
-              ⧉
+              <FontAwesomeIcon icon={faCopy} />
             </button>
             <button
               title="Remove"
               onClick={e => { e.stopPropagation(); onRemove(idx) }}
-              style={{ background: 'none', border: 'none', color: '#FF9999', cursor: 'pointer', fontSize: 12, padding: 0 }}
+              style={{ background: 'none', border: 'none', color: '#FF9999', cursor: 'pointer', fontSize: 13, padding: 0 }}
             >
-              ✕
+              <FontAwesomeIcon icon={faXmark} />
             </button>
           </div>
         </div>

@@ -1,4 +1,6 @@
 import { useReducer } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faXmark } from '@fortawesome/free-solid-svg-icons'
 import PixelConverter from './components/PixelConverter.jsx'
 import FrameStrip from './components/FrameStrip.jsx'
 import AnimationPreview from './components/AnimationPreview.jsx'
@@ -12,8 +14,8 @@ function Win98Window({ title, children, className = '', contentStyle = {}, style
     <div
       className={`flex flex-col ${className}`}
       style={{
-        border: '3px solid #000',
-        boxShadow: '4px 4px 0 rgba(0,0,0,0.35)',
+        border: '2px solid #000',
+        boxShadow: '4px 4px 0 rga(0,0,0,0.35)',
         minHeight: 0,
         overflow: 'hidden',
         ...style,
@@ -23,7 +25,7 @@ function Win98Window({ title, children, className = '', contentStyle = {}, style
       <div
         style={{
           background: WIN_BLUE,
-          padding: '5px 8px',
+          padding: '8px 12px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -31,7 +33,7 @@ function Win98Window({ title, children, className = '', contentStyle = {}, style
           userSelect: 'none',
         }}
       >
-        <span style={{ color: 'white', fontWeight: 'bold', fontSize: '13px', letterSpacing: '0.02em' }}>
+        <span style={{ color: 'white', fontWeight: 'bold', fontSize: '14px', letterSpacing: '0.02em' }}>
           {title}
         </span>
         <button
@@ -51,7 +53,7 @@ function Win98Window({ title, children, className = '', contentStyle = {}, style
             flexShrink: 0,
           }}
         >
-          ✕
+          <FontAwesomeIcon icon={faXmark} />
         </button>
       </div>
       {/* Content */}
@@ -164,7 +166,7 @@ export default function App() {
             <AnimationPreview frames={frames} fps={fps} onSetFps={handleSetFps} activeIdx={activeFrameIdx} />
 
             {/* Frame strip */}
-            <div style={{ borderTop: '1px solid #C8C4B8', padding: '8px 12px' }}>
+            <div style={{ borderTop: ' #C8C4B8', padding: '8px 12px' }}>
               <div style={{ fontSize: 11, fontWeight: 'bold', color: '#6A6A5A', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>
                 Frame
               </div>

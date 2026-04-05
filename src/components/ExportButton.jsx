@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faDownload } from '@fortawesome/free-solid-svg-icons'
 import { T } from '../ui.js'
 
 const FRAME_SIZE = T.FRAME_SIZE
@@ -104,7 +106,7 @@ export default function ExportButton({ frames, fps }) {
           opacity: disabled ? 0.7 : 1,
         }}
       >
-        ↓ {isExporting ? `Encoding… ${progress}%` : `Export GIF`}
+        <FontAwesomeIcon icon={faDownload} /> {isExporting ? `Encoding… ${progress}%` : `Export GIF`}
       </button>
 
       {isExporting && (
