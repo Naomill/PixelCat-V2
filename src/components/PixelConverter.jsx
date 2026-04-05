@@ -3,12 +3,6 @@ import { convertToPixelArt, convertToSVG, cropToContent, generateThumbnail } fro
 import { T } from '../ui.js'
 
 const PIXEL_SIZES = [2, 4, 8, 16]
-const COLOR_OPTIONS = [
-  { label: '16', value: 16 },
-  { label: '32', value: 32 },
-  { label: '64', value: 64 },
-  { label: 'Full', value: 'full' },
-]
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 
 export default function PixelConverter({ onAddFrame }) {
@@ -16,7 +10,7 @@ export default function PixelConverter({ onAddFrame }) {
   const [originalDataUrl, setOriginalDataUrl] = useState(null)
   const [convertedDataUrl, setConvertedDataUrl] = useState(null)
   const [pixelSize, setPixelSize] = useState(8)
-  const [numColors, setNumColors] = useState(32)
+  const [numColors] = useState('full')
   const [removeBg, setRemoveBg] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [error, setError] = useState(null)
@@ -233,29 +227,7 @@ export default function PixelConverter({ onAddFrame }) {
             </div>
           </div>
 
-          {/* Colors */}
-          <div className="flex flex-col gap-1">
-            <span className="text-xs text-muted tracking-wide uppercase">Colors</span>
-            <div className="flex gap-1">
-              {COLOR_OPTIONS.map(opt => (
-                <button
-                  key={opt.label}
-                  onClick={() => setNumColors(opt.value)}
-                  className="px-3 py-1 text-xs font-bold border transition-colors"
-                  style={{
-                    borderColor: numColors === opt.value ? T.blue : T.border,
-                    backgroundColor: numColors === opt.value ? T.blue : 'transparent',
-                    color: numColors === opt.value ? 'white' : T.text,
-                    boxShadow: numColors === opt.value ? `2px 2px 0 #2A70B9` : 'none',
-                  }}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Remove BG */}
+{/* Remove BG */}
           <div className="flex flex-col gap-1">
             <span className="text-xs text-muted tracking-wide uppercase">Background</span>
             <button
