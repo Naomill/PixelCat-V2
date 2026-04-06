@@ -91,9 +91,9 @@ export default function AnimationPreview({ frames, fps, onSetFps }) {
         <button
           onClick={() => setIsPlaying(p => !p)}
           className={isPlaying ? 'btn-pixel-active' : 'btn-pixel'}
-          style={{ padding: '4px 10px', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}
+          style={{ width: 44, height: 44, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
         >
-          <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} /> {isPlaying ? 'Pause' : 'Play'}
+          <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
         </button>
 
         {FPS_OPTIONS.map(f => (
@@ -101,7 +101,7 @@ export default function AnimationPreview({ frames, fps, onSetFps }) {
             key={f}
             onClick={() => onSetFps(f)}
             className={fps === f ? 'btn-pixel-active' : 'btn-pixel'}
-            style={{ padding: '4px 10px', fontSize: 12 }}
+            style={{ width: 44, height: 44, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
           >
             {f}
           </button>

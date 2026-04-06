@@ -82,28 +82,18 @@ export default function ExportButton({ frames, fps }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <div style={{ fontSize: 11, fontWeight: 'bold', color: '#6A6A5A' }}>
-        Download your GIF here!
-      </div>
-
       <button
         onClick={handleExport}
         disabled={disabled}
+        className="btn-pixel-primary"
         style={{
           width: '100%',
-          padding: '8px 12px',
-          background: disabled ? '#C8C4B8' : BTN_BLUE,
-          color: 'white',
-          border: 'none',
+          padding: '10px 12px',
           fontSize: 13,
-          fontWeight: 'bold',
-          cursor: disabled ? 'not-allowed' : 'pointer',
-          fontFamily: 'inherit',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           gap: 6,
-          opacity: disabled ? 0.7 : 1,
         }}
       >
         <FontAwesomeIcon icon={faDownload} /> {isExporting ? `Encoding… ${progress}%` : `Export GIF`}

@@ -183,7 +183,7 @@ export default function PixelConverter({ onAddFrame }) {
           {/* Button */}
           <button
             className="btn-pixel-primary"
-            style={{ padding: '6px 16px', fontSize: 12, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6 }}
+            style={{ padding: '10px 16px', fontSize: 12, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6 }}
             onClick={e => { e.stopPropagation(); fileInputRef.current?.click() }}
           >
             <FontAwesomeIcon icon={faUpload} />
@@ -212,7 +212,7 @@ export default function PixelConverter({ onAddFrame }) {
                     key={size}
                     onClick={() => setPixelSize(size)}
                     className={pixelSize === size ? 'btn-pixel-active' : 'btn-pixel'}
-                    style={{ padding: '6px 10px', fontSize: 12 }}
+                    style={{ width: 52, height: 36, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     {size}px
                   </button>
@@ -248,7 +248,7 @@ export default function PixelConverter({ onAddFrame }) {
 
       {/* Before / After preview */}
       {image && (
-        <div style={{ display: 'flex', gap: 10, flex: 1, minHeight: 0 }}>
+        <div className="before-after-wrap" style={{ display: 'flex', gap: 10, flex: 1, minHeight: 0 }}>
           {/* Before */}
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
             <span style={{ fontSize: 11, color: '#6A6A5A', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Before</span>
@@ -256,17 +256,13 @@ export default function PixelConverter({ onAddFrame }) {
               flex: 1,
               border: '2px solid #C8C4B8',
               background: '#fff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
               overflow: 'hidden',
               minHeight: 160,
-              maxHeight: 300,
             }}>
               <img
                 src={originalDataUrl}
                 alt="Original"
-                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
               />
             </div>
           </div>
@@ -279,19 +275,18 @@ export default function PixelConverter({ onAddFrame }) {
             <div style={{
               flex: 1,
               border: '2px solid #C8C4B8',
-              background: removeBg ? '#fff' : '#fff',
               backgroundImage: removeBg
                 ? 'linear-gradient(45deg,#ccc 25%,transparent 25%),linear-gradient(-45deg,#ccc 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ccc 75%),linear-gradient(-45deg,transparent 75%,#ccc 75%)'
                 : 'none',
+              backgroundColor: '#fff',
               backgroundSize: removeBg ? '16px 16px' : 'auto',
               backgroundPosition: removeBg ? '0 0,0 8px,8px -8px,-8px 0' : 'auto',
+              overflow: 'hidden',
+              minHeight: 160,
+              position: 'relative',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              overflow: 'hidden',
-              minHeight: 160,
-              maxHeight: 300,
-              position: 'relative',
             }}>
               {isConverting ? (
                 <div style={{ fontSize: 11, color: '#999' }}>converting…</div>
@@ -300,7 +295,7 @@ export default function PixelConverter({ onAddFrame }) {
                   src={convertedDataUrl}
                   alt="Pixel art"
                   className="pixel-canvas"
-                  style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', imageRendering: 'pixelated' }}
+                  style={{ width: '100%', height: '100%', objectFit: 'contain', imageRendering: 'pixelated', display: 'block' }}
                 />
               ) : null}
             </div>
@@ -319,40 +314,27 @@ export default function PixelConverter({ onAddFrame }) {
       {/* Action bar */}
       {convertedDataUrl && !isConverting && (
         <div style={{
-          display: 'flex',
-          gap: 0,
-          borderTop: '1px solid #C8C4B8',
-          paddingTop: 10,
           marginTop: 4,
         }}>
-          {/* Left: Download */}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6, paddingRight: 10 }}>
-            <div style={{ fontSize: 11, color: '#6A6A5A', fontWeight: 'bold' }}>Download pixel image</div>
-            <div style={{ display: 'flex', gap: 6 }}>
-              <button
-                onClick={handleDownloadPNG}
-                className="btn-pixel"
-                style={{ flex: 1, padding: '7px 8px', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}
-              >
-                <FontAwesomeIcon icon={faDownload} /> Save as PNG
-              </button>
-              <button
-                onClick={handleDownloadSVG}
-                className="btn-pixel"
-                style={{ flex: 1, padding: '7px 8px', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}
-              >
-                <FontAwesomeIcon icon={faDownload} /> Save as SVG
-              </button>
-            </div>
-          </div>
-
-          {/* Right: Add frame */}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 10 }}>
-            <div style={{ fontSize: 11, color: '#6A6A5A', fontWeight: 'bold' }}>Add frame to make animation</div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              onClick={handleDownloadPNG}
+              className="btn-pixel"
+              style={{ flex: 1, padding: '10px 8px', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}
+            >
+              <FontAwesomeIcon icon={faDownload} /> Save as PNG
+            </button>
+            <button
+              onClick={handleDownloadSVG}
+              className="btn-pixel"
+              style={{ flex: 1, padding: '10px 8px', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}
+            >
+              <FontAwesomeIcon icon={faDownload} /> Save as SVG
+            </button>
             <button
               onClick={handleUseThis}
               className="btn-pixel-primary"
-              style={{ padding: '8px 12px', fontSize: 12, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}
+              style={{ flex: 1, padding: '10px 8px', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}
             >
               <FontAwesomeIcon icon={faPlus} /> Use this frame
             </button>

@@ -137,19 +137,7 @@ export default function App() {
       </header>
 
       {/* Main windows */}
-      <main
-        style={{
-          flex: 1,
-          display: 'flex',
-          gap: 16,
-          padding: '0 16px 20px',
-          alignItems: 'stretch',
-          maxWidth: 1400,
-          width: '100%',
-          margin: '0 auto',
-          boxSizing: 'border-box',
-        }}
-      >
+      <main className="main-layout">
         {/* Left window — Upload & Convert */}
         <Win98Window title="Upload and Convert" className="flex-1" contentStyle={{ display: 'flex', flexDirection: 'column' }}>
           <PixelConverter onAddFrame={handleAddFrame} />
@@ -159,31 +147,35 @@ export default function App() {
         <Win98Window
           title="Preview Animation"
           contentStyle={{ display: 'flex', flexDirection: 'column' }}
-          style={{ width: 420, flexShrink: 0 }}
+          className="preview-window"
         >
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
             {/* Animation preview */}
             <AnimationPreview frames={frames} fps={fps} onSetFps={handleSetFps} activeIdx={activeFrameIdx} />
 
             {/* Frame strip */}
-            <div style={{ borderTop: ' #C8C4B8', padding: '8px 12px' }}>
-              <div style={{ fontSize: 11, fontWeight: 'bold', color: '#6A6A5A', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>
-                Frame
+            {frames.length > 0 && (
+              <div style={{ padding: '8px 12px' }}>
+                <div style={{ fontSize: 11, fontWeight: 'bold', color: '#6A6A5A', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>
+                  Frame
+                </div>
+                <FrameStrip
+                  frames={frames}
+                  activeIdx={activeFrameIdx}
+                  onSelect={handleSelectFrame}
+                  onRemove={handleRemoveFrame}
+                  onReorder={handleReorder}
+                  onDuplicate={handleDuplicate}
+                />
               </div>
-              <FrameStrip
-                frames={frames}
-                activeIdx={activeFrameIdx}
-                onSelect={handleSelectFrame}
-                onRemove={handleRemoveFrame}
-                onReorder={handleReorder}
-                onDuplicate={handleDuplicate}
-              />
-            </div>
+            )}
 
             {/* Export */}
-            <div style={{ borderTop: '1px solid #C8C4B8', padding: '10px 12px' }}>
-              <ExportButton frames={frames} fps={fps} />
-            </div>
+            {frames.length > 0 && (
+              <div style={{ padding: '10px 12px' }}>
+                <ExportButton frames={frames} fps={fps} />
+              </div>
+            )}
           </div>
         </Win98Window>
       </main>
