@@ -138,10 +138,10 @@ export default function PixelConverter({ onAddFrame }) {
 
       {/* Upload zone */}
       <div
+        role="button"
         style={{
           border: `2px dashed ${isDragging ? '#3550C4' : '#C8C4B8'}`,
           backgroundColor: isDragging ? '#E8EDFF' : '#F5F2EC',
-          cursor: 'pointer',
           transition: 'border-color 0.15s, background-color 0.15s',
           padding: '16px 12px',
         }}

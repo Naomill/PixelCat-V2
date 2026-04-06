@@ -53,7 +53,6 @@ export default function FrameStrip({ frames, activeIdx, onSelect, onRemove, onRe
           style={{
             position: 'relative',
             flexShrink: 0,
-            cursor: 'pointer',
             border: activeIdx === idx ? '2px solid #3550C4' : '2px solid #C8C4B8',
             boxShadow: dragOverIdx === idx ? '0 0 0 2px #3550C4' : 'none',
             opacity: dragFromIdx.current === idx ? 0.4 : 1,
@@ -103,14 +102,14 @@ export default function FrameStrip({ frames, activeIdx, onSelect, onRemove, onRe
             <button
               title="Duplicate"
               onClick={e => { e.stopPropagation(); onDuplicate(idx) }}
-              style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: 13, padding: 0 }}
+              style={{ background: 'none', border: 'none', color: 'white', fontSize: 13, padding: 0 }}
             >
               <FontAwesomeIcon icon={faCopy} />
             </button>
             <button
               title="Remove"
               onClick={e => { e.stopPropagation(); onRemove(idx) }}
-              style={{ background: 'none', border: 'none', color: '#FF9999', cursor: 'pointer', fontSize: 13, padding: 0 }}
+              style={{ background: 'none', border: 'none', color: '#FF9999', fontSize: 13, padding: 0 }}
             >
               <FontAwesomeIcon icon={faXmark} />
             </button>

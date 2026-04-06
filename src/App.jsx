@@ -44,7 +44,6 @@ function Win98Window({ title, children, className = '', contentStyle = {}, style
             width: 22,
             height: 20,
             fontSize: '12px',
-            cursor: 'pointer',
             fontWeight: 'bold',
             lineHeight: 1,
             display: 'flex',
