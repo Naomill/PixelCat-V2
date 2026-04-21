@@ -1,68 +1,93 @@
-import { useReducer } from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faXmark } from '@fortawesome/free-solid-svg-icons'
+import { useReducer, useState, useEffect, useCallback } from 'react'
 import PixelConverter from './components/PixelConverter.jsx'
 import FrameStrip from './components/FrameStrip.jsx'
 import AnimationPreview from './components/AnimationPreview.jsx'
 import ExportButton from './components/ExportButton.jsx'
 
-const WIN_BLUE = 'linear-gradient(to bottom, #4A6FD8 0%, #3550C4 100%)'
-const WIN_BG = '#EDE8DC'
-
-function Win98Window({ title, children, className = '', contentStyle = {}, style = {} }) {
+// ===================== BACKGROUND SCENE =====================
+function PixelBackground() {
+  const clouds = [
+    { top: 30, left: '8%', w: 90, h: 24 },
+    { top: 50, left: '25%', w: 130, h: 32 },
+    { top: 20, left: '52%', w: 80, h: 20 },
+    { top: 60, left: '68%', w: 110, h: 28 },
+    { top: 35, left: '85%', w: 95, h: 22 },
+  ]
+  const grassX = [40, 120, 200, 300, 420, 550, 680, 780, 880]
   return (
-    <div
-      className={`flex flex-col ${className}`}
-      style={{
-        border: '2px solid #000',
-        boxShadow: '4px 4px 0 rga(0,0,0,0.35)',
-        minHeight: 0,
-        overflow: 'hidden',
-        ...style,
-      }}
-    >
-      {/* Title bar */}
-      <div
-        style={{
-          background: WIN_BLUE,
-          padding: '8px 12px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexShrink: 0,
-          userSelect: 'none',
-        }}
-      >
-        <span style={{ color: 'white', fontWeight: 'bold', fontSize: '14px', letterSpacing: '0.02em' }}>
-          {title}
-        </span>
-        <button
-          style={{
-            background: '#CC2233',
-            color: 'white',
-            border: '1px solid #AA1122',
-            width: 22,
-            height: 20,
-            fontSize: '12px',
-            fontWeight: 'bold',
-            lineHeight: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-          }}
-        >
-          <FontAwesomeIcon icon={faXmark} />
-        </button>
+    <div className="scene">
+      <div className="sky">
+        {clouds.map((c, i) => (
+          <div key={i} style={{
+            position: 'absolute', top: c.top, left: c.left,
+            width: c.w, height: c.h,
+            background: 'rgba(255,255,255,0.9)',
+            boxShadow: `${c.w * 0.3}px 0 0 rgba(255,255,255,0.9), ${c.w * 0.6}px -6px 0 rgba(255,255,255,0.9), ${c.w * 0.15}px -10px 0 rgba(255,255,255,0.85)`,
+            imageRendering: 'pixelated',
+          }} />
+        ))}
       </div>
-      {/* Content */}
-      <div style={{ flex: 1, overflow: 'auto', backgroundColor: WIN_BG, ...contentStyle }}>
+      <div className="ground-strip">
+        {grassX.map((x, i) => (
+          <div key={i} style={{
+            position: 'absolute', bottom: 0, left: x,
+            width: 8, height: 20,
+            background: 'var(--grass-col)',
+          }} />
+        ))}
+      </div>
+      <div className="ground-dark" />
+    </div>
+  )
+}
+
+// ===================== PANEL WINDOW =====================
+function Win98Window({ title, children, style = {}, badge }) {
+  return (
+    <div className="pixel-panel" style={style}>
+      <div className="panel-titlebar">
+        <span className="panel-title-text">{title}</span>
+        {badge && <span className="badge">{badge}</span>}
+        <div className="panel-btn">-</div>
+        <div className="panel-btn">□</div>
+        <div className="panel-btn close">✕</div>
+      </div>
+      <div className="panel-body">
         {children}
       </div>
     </div>
   )
 }
 
+// ===================== NOTIFICATION =====================
+function Notification({ message }) {
+  if (!message) return null
+  return <div className="notification">{message}</div>
+}
+
+// ===================== TWEAK PANEL =====================
+function TweakPanel({ visible, theme, setTheme, onReset }) {
+  return (
+    <div className={`tweak-panel ${visible ? 'visible' : ''}`}>
+      <div className="tweak-title">⚙ Tweaks</div>
+      <div className="tweak-body">
+        <div className="tweak-row">
+          <label>PANEL THEME</label>
+          <select value={theme} onChange={e => setTheme(e.target.value)}>
+            <option value="classic">Classic Win95</option>
+            <option value="dark">Dark Mode</option>
+          </select>
+        </div>
+        <div className="tweak-row">
+          <label>RESET</label>
+          <button className="px-btn sm danger" onClick={onReset}>Clear All</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ===================== REDUCER =====================
 const initialState = {
   frames: [],
   fps: 8,
@@ -98,86 +123,125 @@ function reducer(state, action) {
       const newFrames = [...state.frames.slice(0, action.index + 1), dup, ...state.frames.slice(action.index + 1)]
       return { ...state, frames: newFrames, activeFrameIdx: action.index + 1 }
     }
+    case 'RESET':
+      return initialState
     default:
       return state
   }
 }
 
+// ===================== APP =====================
 export default function App() {
   const [state, dispatch] = useReducer(reducer, initialState)
   const { frames, fps, activeFrameIdx } = state
 
-  const handleAddFrame = (frame) => dispatch({ type: 'ADD_FRAME', frame })
-  const handleRemoveFrame = (index) => dispatch({ type: 'REMOVE_FRAME', index })
-  const handleReorder = (from, to) => dispatch({ type: 'REORDER_FRAMES', from, to })
-  const handleSelectFrame = (index) => dispatch({ type: 'SET_ACTIVE', index })
-  const handleSetFps = (fps) => dispatch({ type: 'SET_FPS', fps })
-  const handleDuplicate = (index) => dispatch({ type: 'DUPLICATE_FRAME', index })
+  const [theme, setTheme] = useState('classic')
+  const [notification, setNotification] = useState(null)
+  const [tweakVisible, setTweakVisible] = useState(false)
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }, [theme])
+
+  const notify = useCallback((msg) => {
+    setNotification(msg)
+    setTimeout(() => setNotification(null), 2200)
+  }, [])
+
+  const handleAddFrame = useCallback((frame) => {
+    dispatch({ type: 'ADD_FRAME', frame })
+    notify('✓ Frame added!')
+  }, [notify])
+
+  const handleReset = () => {
+    dispatch({ type: 'RESET' })
+    setTweakVisible(false)
+    notify('✓ Reset!')
+  }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'LINESeedSansTH', 'Courier New', sans-serif" }}>
-      {/* Header */}
-      <header style={{ textAlign: 'center', padding: '20px 16px 12px', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+    <>
+      <PixelBackground />
+
+      {/* Top bar */}
+      <div className="app-titlebar">
+        <div className="app-logo">
           <img
             src="/logo.svg"
             alt="PixelCat"
-            style={{ width: 52, height: 'auto', imageRendering: 'pixelated' }}
+            style={{ width: 32, height: 32, imageRendering: 'pixelated' }}
+            className={frames.length > 0 ? 'cat-bounce' : ''}
           />
-          <div style={{ textAlign: 'left' }}>
-            <div style={{ fontSize: 28, fontWeight: 'bold', color: '#111', lineHeight: 1 }}>
-              PixelCat
-            </div>
-            <div style={{ fontSize: 13, color: '#333', marginTop: 2 }}>
-              Image Pixel Convertor
-            </div>
+          <div>
+            <div className="app-title">PixelCat</div>
+            <div className="app-subtitle">IMAGE PIXEL CONVERTER</div>
           </div>
         </div>
-      </header>
+        <button
+          className="px-btn sm"
+          style={{ marginLeft: 'auto' }}
+          onClick={() => setTweakVisible(v => !v)}
+        >
+          ⚙ Tweaks
+        </button>
+      </div>
 
-      {/* Main windows */}
-      <main className="main-layout">
-        {/* Left window — Upload & Convert */}
-        <Win98Window title="Upload and Convert" className="flex-1" contentStyle={{ display: 'flex', flexDirection: 'column' }}>
+      <Notification message={notification} />
+
+      {/* Main layout */}
+      <div className="app-layout">
+
+        {/* Left panel — Upload & Convert */}
+        <Win98Window
+          title="🖼 Upload and Convert"
+          style={{ width: 'clamp(520px, 44vw, 860px)', flexShrink: 0, height: 'clamp(500px, calc(100vh - 120px), 660px)' }}
+        >
           <PixelConverter onAddFrame={handleAddFrame} />
         </Win98Window>
 
-        {/* Right window — Preview & Export */}
+        {/* Right panel — Preview Animation */}
         <Win98Window
-          title="Preview Animation"
-          contentStyle={{ display: 'flex', flexDirection: 'column' }}
-          className="preview-window"
+          title="▶ Preview Animation"
+          badge={frames.length > 1 ? `${frames.length}f` : null}
+          style={{ width: 'clamp(360px, 30vw, 600px)', flexShrink: 0, height: 'clamp(500px, calc(100vh - 120px), 660px)' }}
         >
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-            {/* Animation preview */}
-            <AnimationPreview frames={frames} fps={fps} onSetFps={handleSetFps} activeIdx={activeFrameIdx} />
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
+            <AnimationPreview
+              frames={frames}
+              fps={fps}
+              onSetFps={f => dispatch({ type: 'SET_FPS', fps: f })}
+              activeIdx={activeFrameIdx}
+            />
 
-            {/* Frame strip */}
             {frames.length > 0 && (
-              <div style={{ padding: '8px 12px' }}>
-                <div style={{ fontSize: 11, fontWeight: 'bold', color: '#6A6A5A', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>
-                  Frame
-                </div>
+              <div className="frame-list">
                 <FrameStrip
                   frames={frames}
                   activeIdx={activeFrameIdx}
-                  onSelect={handleSelectFrame}
-                  onRemove={handleRemoveFrame}
-                  onReorder={handleReorder}
-                  onDuplicate={handleDuplicate}
+                  onSelect={idx => dispatch({ type: 'SET_ACTIVE', index: idx })}
+                  onRemove={idx => dispatch({ type: 'REMOVE_FRAME', index: idx })}
+                  onReorder={(from, to) => dispatch({ type: 'REORDER_FRAMES', from, to })}
+                  onDuplicate={idx => dispatch({ type: 'DUPLICATE_FRAME', index: idx })}
                 />
               </div>
             )}
 
-            {/* Export */}
             {frames.length > 0 && (
-              <div style={{ padding: '10px 12px' }}>
+              <div className="action-bar">
                 <ExportButton frames={frames} fps={fps} />
               </div>
             )}
           </div>
         </Win98Window>
-      </main>
-    </div>
+
+      </div>
+
+      <TweakPanel
+        visible={tweakVisible}
+        theme={theme}
+        setTheme={setTheme}
+        onReset={handleReset}
+      />
+    </>
   )
 }

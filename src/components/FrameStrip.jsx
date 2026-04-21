@@ -33,14 +33,12 @@ export default function FrameStrip({ frames, activeIdx, onSelect, onRemove, onRe
 
   if (frames.length === 0) {
     return (
-      <div style={{ fontSize: 11, color: '#8A8A7A', padding: '4px 0' }}>
-        No frames yet
-      </div>
+      <div className="empty-label" style={{ padding: '4px 0' }}>No frames yet</div>
     )
   }
 
   return (
-    <div style={{ display: 'flex', gap: 4, overflowX: 'auto', paddingBottom: 2 }}>
+    <div style={{ display: 'flex', gap: 6, overflowX: 'auto', alignItems: 'center', minHeight: 44 }}>
       {frames.map((frame, idx) => (
         <div
           key={frame.id}
@@ -50,44 +48,29 @@ export default function FrameStrip({ frames, activeIdx, onSelect, onRemove, onRe
           onDrop={e => handleDrop(e, idx)}
           onDragEnd={handleDragEnd}
           onClick={() => onSelect(idx)}
+          className={`frame-thumb ${activeIdx === idx ? 'active' : ''}`}
           style={{
-            position: 'relative',
-            flexShrink: 0,
-            border: activeIdx === idx ? '2px solid #3550C4' : '2px solid #C8C4B8',
-            boxShadow: dragOverIdx === idx ? '0 0 0 2px #3550C4' : 'none',
+            boxShadow: dragOverIdx === idx ? '0 0 0 2px #1a45c8' : '2px 2px 0 #000',
             opacity: dragFromIdx.current === idx ? 0.4 : 1,
           }}
         >
           <img
             src={frame.thumbnail}
             alt={`Frame ${idx + 1}`}
-            width={56}
-            height={56}
+            width={52}
+            height={52}
             className="pixel-canvas"
             draggable={false}
-            style={{ display: 'block' }}
+            style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }}
           />
-
-          {/* Number badge */}
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            background: activeIdx === idx ? '#3550C4' : '#555',
-            color: 'white',
-            fontSize: 9,
-            lineHeight: '14px',
-            padding: '0 3px',
-          }}>
-            {idx + 1}
-          </div>
+          <div className="frame-num">{idx + 1}</div>
 
           {/* Hover controls */}
           <div
             style={{
               position: 'absolute',
               inset: 0,
-              background: 'rgba(0,0,0,0.55)',
+              background: 'rgba(0,0,0,0.6)',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -102,33 +85,19 @@ export default function FrameStrip({ frames, activeIdx, onSelect, onRemove, onRe
             <button
               title="Duplicate"
               onClick={e => { e.stopPropagation(); onDuplicate(idx) }}
-              style={{ background: 'none', border: 'none', color: 'white', fontSize: 13, padding: 0 }}
+              style={{ background: 'none', border: 'none', color: 'white', fontSize: 11, padding: 0 }}
             >
               <FontAwesomeIcon icon={faCopy} />
             </button>
             <button
               title="Remove"
               onClick={e => { e.stopPropagation(); onRemove(idx) }}
-              style={{ background: 'none', border: 'none', color: '#FF9999', fontSize: 13, padding: 0 }}
+              style={{ background: 'none', border: 'none', color: '#FF9999', fontSize: 11, padding: 0 }}
             >
               <FontAwesomeIcon icon={faXmark} />
             </button>
           </div>
         </div>
-      ))}
-
-      {/* Empty slots placeholder */}
-      {[...Array(Math.max(0, 4 - frames.length))].map((_, i) => (
-        <div
-          key={`empty-${i}`}
-          style={{
-            width: 60,
-            height: 60,
-            border: '2px solid #C8C4B8',
-            background: '#F0EDE6',
-            flexShrink: 0,
-          }}
-        />
       ))}
     </div>
   )

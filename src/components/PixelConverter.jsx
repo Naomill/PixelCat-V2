@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faDownload, faPlus, faCheck, faUpload } from '@fortawesome/free-solid-svg-icons'
+import { faPlus, faCheck } from '@fortawesome/free-solid-svg-icons'
 import { convertToPixelArt, convertToSVG, cropToContent, generateThumbnail } from '../utils/pixelArt.js'
 
 const PIXEL_SIZES = [2, 4, 8, 16]
-const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
-
+const MAX_FILE_SIZE = 5 * 1024 * 1024
 
 export default function PixelConverter({ onAddFrame }) {
   const [image, setImage] = useState(null)
@@ -134,17 +133,12 @@ export default function PixelConverter({ onAddFrame }) {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: 12, gap: 10 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
 
       {/* Upload zone */}
       <div
         role="button"
-        style={{
-          border: `2px dashed ${isDragging ? '#3550C4' : '#C8C4B8'}`,
-          backgroundColor: isDragging ? '#E8EDFF' : '#F5F2EC',
-          transition: 'border-color 0.15s, background-color 0.15s',
-          padding: '16px 12px',
-        }}
+        className={`upload-zone ${isDragging ? 'drag-over' : ''}`}
         onDrop={handleDrop}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
@@ -158,186 +152,153 @@ export default function PixelConverter({ onAddFrame }) {
           style={{ display: 'none' }}
           onChange={handleFileInput}
         />
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          {/* Icon */}
-          <img
-            src={image ? (originalDataUrl || '/DropImgIcon.png') : '/DropImgIcon.png'}
-            alt="drop"
-            style={{
-              width: 52,
-              height: 52,
-              objectFit: 'contain',
-              imageRendering: 'pixelated',
-              flexShrink: 0,
-            }}
-          />
-          {/* Text */}
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: 'bold', color: '#222' }}>
-              {image ? 'Drop new image to replace' : 'Drop image here or click to select'}
-            </div>
-            <div style={{ fontSize: 11, color: '#6A6A5A', marginTop: 2 }}>
-              PNG, JPG, WebP, GIF (max 5MB) or command+v to paste
-            </div>
+        <img
+          src={image ? (originalDataUrl || '/DropImgIcon.png') : '/DropImgIcon.png'}
+          alt="drop"
+          style={{ width: 40, height: 40, objectFit: 'contain', imageRendering: 'pixelated', flexShrink: 0 }}
+        />
+        <div className="upload-zone-text">
+          <div className="upload-zone-title">
+            {isDragging ? 'DROP IT!' : image ? '✓ Image ready' : 'Drop image or click to select'}
           </div>
-          {/* Button */}
+          <div className="upload-zone-sub" >
+            PNG, JPG, WebP, GIF (max 5MB)<br />
+            or cmd+v to paste
+          </div>
+        </div>
+        <button
+          className="px-btn sm"
+          onClick={e => { e.stopPropagation(); fileInputRef.current?.click() }}
+        >
+          ↑ {image ? 'Change' : 'Upload'}
+        </button>
+      </div>
+
+      {/* Error */}
+      {error && <div className="error-msg" style={{ margin: '0 12px' }}>{error}</div>}
+
+      {/* Settings bar */}
+      <div className="settings-bar">
+        {/* Pixel Size */}
+        <div className="setting-group">
+          <div className="setting-label">PIXEL SIZE</div>
+          <div style={{ display: 'flex', gap: 4 }}>
+            {PIXEL_SIZES.map(size => (
+              <button
+                key={size}
+                onClick={() => setPixelSize(size)}
+                className={`px-btn sm ${pixelSize === size ? 'active' : ''}`}
+                style={{ padding: '4px 8px', minWidth: 32 }}
+              >
+                {size}px
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Remove BG */}
+        <div className="setting-group">
+          <div className="setting-label">BACKGROUND</div>
           <button
-            className="btn-pixel-primary"
-            style={{ padding: '10px 16px', fontSize: 12, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6 }}
-            onClick={e => { e.stopPropagation(); fileInputRef.current?.click() }}
+            onClick={() => setRemoveBg(v => !v)}
+            className={`px-btn sm ${removeBg ? 'active' : ''}`}
+            style={{ display: 'flex', alignItems: 'center', gap: 5 }}
           >
-            <FontAwesomeIcon icon={faUpload} />
-            {image ? 'Change' : 'Upload'}
+            <span style={{
+              width: 10, height: 10,
+              border: '2px solid currentColor',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 7,
+              flexShrink: 0,
+            }}>
+              {removeBg ? <FontAwesomeIcon icon={faCheck} /> : ''}
+            </span>
+            Remove BG
           </button>
         </div>
       </div>
 
-      {/* Error */}
-      {error && (
-        <div style={{ fontSize: 11, color: '#CC2222', border: '1px solid #FFAAAA', background: '#FFF0F0', padding: '4px 8px' }}>
-          {error}
-        </div>
-      )}
-
-      {/* Controls */}
-      {image && (
-        <div style={{ border: '2px solid #C8C4B8', padding: '16px 12px', background: '#F5F2EC' }}>
-          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-            {/* Pixel Size */}
-            <div>
-              <div style={{ fontSize: 11, color: '#6A6A5A', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Pixel Size</div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                {PIXEL_SIZES.map(size => (
-                  <button
-                    key={size}
-                    onClick={() => setPixelSize(size)}
-                    className={pixelSize === size ? 'btn-pixel-active' : 'btn-pixel'}
-                    style={{ width: 52, height: 36, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                  >
-                    {size}px
-                  </button>
-                ))}
+      {/* Canvas area — Before / After */}
+      <div className="canvas-area" style={{ flex: 1 }}>
+        {image ? (
+          <>
+            {/* Before */}
+            <div className="before-after-panel">
+              <div className="before-after-label">Before</div>
+              <div className="before-after-img">
+                <img
+                  src={originalDataUrl}
+                  alt="Original"
+                  style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+                />
               </div>
             </div>
 
-            {/* Remove BG */}
-            <div>
-              <div style={{ fontSize: 11, color: '#6A6A5A', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Background</div>
-              <button
-                onClick={() => setRemoveBg(v => !v)}
-                className={removeBg ? 'btn-pixel-active' : 'btn-pixel'}
-                style={{ padding: '6px 12px', fontSize: 12, display: 'flex', alignItems: 'center', gap: 6 }}
-              >
-                <span style={{
-                  width: 14, height: 14,
-                  border: '2px solid currentColor',
-                  display: 'inline-flex',
+            {/* After */}
+            <div className="before-after-panel">
+              <div className="before-after-label">
+                After{removeBg && <span style={{ color: '#4a8aff' }}> · transparent</span>}
+              </div>
+              <div
+                className="before-after-img"
+                style={{
+                  backgroundImage: removeBg
+                    ? 'linear-gradient(45deg,#ccc 25%,transparent 25%),linear-gradient(-45deg,#ccc 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ccc 75%),linear-gradient(-45deg,transparent 75%,#ccc 75%)'
+                    : 'none',
+                  backgroundSize: removeBg ? '14px 14px' : 'auto',
+                  backgroundPosition: removeBg ? '0 0,0 7px,7px -7px,-7px 0' : 'auto',
+                  display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: 9,
-                  flexShrink: 0,
-                }}>
-                  {removeBg ? <FontAwesomeIcon icon={faCheck} /> : ''}
-                </span>
-                Remove BG
-              </button>
+                  position: 'relative',
+                }}
+              >
+                {isConverting ? (
+                  <div className="empty-label">converting…</div>
+                ) : convertedDataUrl ? (
+                  <img
+                    src={convertedDataUrl}
+                    alt="Pixel art"
+                    className="pixel-canvas"
+                    style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+                  />
+                ) : null}
+              </div>
             </div>
+          </>
+        ) : (
+          <div className="empty-state">
+            <img
+              src="/NoImgContentIcon.png"
+              alt=""
+              style={{ width: 72, imageRendering: 'pixelated', opacity: 0.8 }}
+            />
+            <div className="empty-label">Upload an image to get started!</div>
           </div>
-        </div>
-      )}
-
-      {/* Before / After preview */}
-      {image && (
-        <div className="before-after-wrap" style={{ display: 'flex', gap: 10, flex: 1, minHeight: 0 }}>
-          {/* Before */}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
-            <span style={{ fontSize: 11, color: '#6A6A5A', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Before</span>
-            <div style={{
-              flex: 1,
-              border: '2px solid #C8C4B8',
-              background: '#fff',
-              overflow: 'hidden',
-              minHeight: 160,
-            }}>
-              <img
-                src={originalDataUrl}
-                alt="Original"
-                style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
-              />
-            </div>
-          </div>
-
-          {/* After */}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
-            <span style={{ fontSize: 11, color: '#6A6A5A', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              After{removeBg && <span style={{ color: '#3550C4' }}> · transparent</span>}
-            </span>
-            <div style={{
-              flex: 1,
-              border: '2px solid #C8C4B8',
-              backgroundImage: removeBg
-                ? 'linear-gradient(45deg,#ccc 25%,transparent 25%),linear-gradient(-45deg,#ccc 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ccc 75%),linear-gradient(-45deg,transparent 75%,#ccc 75%)'
-                : 'none',
-              backgroundColor: '#fff',
-              backgroundSize: removeBg ? '16px 16px' : 'auto',
-              backgroundPosition: removeBg ? '0 0,0 8px,8px -8px,-8px 0' : 'auto',
-              overflow: 'hidden',
-              minHeight: 160,
-              position: 'relative',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-              {isConverting ? (
-                <div style={{ fontSize: 11, color: '#999' }}>converting…</div>
-              ) : convertedDataUrl ? (
-                <img
-                  src={convertedDataUrl}
-                  alt="Pixel art"
-                  className="pixel-canvas"
-                  style={{ width: '100%', height: '100%', objectFit: 'contain', imageRendering: 'pixelated', display: 'block' }}
-                />
-              ) : null}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Empty state */}
-      {!image && !error && (
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 10 }}>
-          <img src="/NoImgContentIcon.png" alt="" style={{ width: 90, imageRendering: 'pixelated', opacity: 0.8 }} />
-          <div style={{ fontSize: 12, color: '#8A8A7A' }}>Upload an image to started!</div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Action bar */}
       {convertedDataUrl && !isConverting && (
-        <div style={{
-          marginTop: 4,
-        }}>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button
-              onClick={handleDownloadPNG}
-              className="btn-pixel"
-              style={{ flex: 1, padding: '10px 8px', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}
-            >
-              <FontAwesomeIcon icon={faDownload} /> Save as PNG
-            </button>
-            <button
-              onClick={handleDownloadSVG}
-              className="btn-pixel"
-              style={{ flex: 1, padding: '10px 8px', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}
-            >
-              <FontAwesomeIcon icon={faDownload} /> Save as SVG
-            </button>
-            <button
-              onClick={handleUseThis}
-              className="btn-pixel-primary"
-              style={{ flex: 1, padding: '10px 8px', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}
-            >
-              <FontAwesomeIcon icon={faPlus} /> Use this frame
-            </button>
+        <div className="action-bar">
+          <button onClick={handleDownloadPNG} className="px-btn sm">
+            ↓ Save PNG
+          </button>
+          <button onClick={handleDownloadSVG} className="px-btn sm">
+            ↓ Save SVG
+          </button>
+          <button
+            onClick={handleUseThis}
+            className="px-btn sm success"
+            style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+          >
+            <FontAwesomeIcon icon={faPlus} style={{ fontSize: 8 }} /> Add Frame
+          </button>
+          <div style={{ marginLeft: 'auto', color: 'var(--status-text)', display: 'flex', gap: 10, fontFamily: 'var(--pixel-font)', fontSize: '9px' }}>
+            <span>{pixelSize}px</span>
+            {removeBg && <span>transparent</span>}
           </div>
         </div>
       )}

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons'
+import { faPause, faPlay, faBackward, faForward } from '@fortawesome/free-solid-svg-icons'
 
 const FPS_OPTIONS = [4, 8, 12, 24]
 
@@ -21,91 +21,100 @@ export default function AnimationPreview({ frames, fps, onSetFps }) {
   }, [frames, fps, isPlaying])
 
   const currentFrame = frames.length > 0 ? frames[Math.min(currentIdx, frames.length - 1)] : null
+  const totalMs = frames.length > 0 ? Math.round((1000 / fps) * frames.length) : 0
 
-  // Empty state — no frames yet
   if (frames.length === 0) {
     return (
-      <div style={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 12,
-        padding: 24,
-      }}>
-        <img
-          src="/NoFrameContentIcon.png"
-          alt=""
-          style={{ width: 52, imageRendering: 'pixelated' }}
-        />
-        <div style={{ fontSize: 13, color: '#8A8A7A' }}>Add frames to preview animation</div>
+      <div className="anim-preview-area" style={{ flex: 1 }}>
+        <div className="empty-state">
+          <img
+            src="/NoFrameContentIcon.png"
+            alt=""
+            style={{ width: 52, imageRendering: 'pixelated' }}
+          />
+          <div className="empty-label">Add frames to preview<br />animation</div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
       {/* Preview area */}
-      <div
-        style={{
-          flex: 1,
-          background: '#fff',
-          border: '2px solid #C8C4B8',
-          margin: 12,
-          marginBottom: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          position: 'relative',
-          minHeight: 280,
-          overflow: 'hidden',
-        }}
-      >
-        <img
-          src={currentFrame.dataUrl}
-          alt={`Frame ${currentIdx + 1}`}
-          className="pixel-canvas"
-          style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', imageRendering: 'pixelated' }}
-        />
-
-        {/* Frame counter */}
-        <div style={{
-          position: 'absolute',
-          bottom: 6,
-          right: 8,
-          fontSize: 11,
-          color: '#888',
-          background: 'rgba(255,255,255,0.85)',
-          padding: '1px 6px',
-          border: '1px solid #ccc',
-        }}>
-          {currentIdx + 1} / {frames.length}
+      <div className="anim-preview-area" style={{ flex: 1 }}>
+        <div style={{ position: 'relative', display: 'inline-block' }}>
+          <img
+            src={currentFrame.dataUrl}
+            alt={`Frame ${currentIdx + 1}`}
+            className="pixel-canvas"
+            style={{
+              maxWidth: '100%',
+              maxHeight: '260px',
+              objectFit: 'contain',
+              imageRendering: 'pixelated',
+              display: 'block',
+              border: '2px solid var(--upload-border)',
+              boxShadow: '3px 3px 0 #000',
+            }}
+          />
+          {frames.length > 1 && (
+            <div style={{
+              position: 'absolute',
+              bottom: 4,
+              right: 4,
+              fontSize: '5px',
+              color: '#fff',
+              background: 'rgba(0,0,0,0.65)',
+              padding: '2px 5px',
+              fontFamily: 'var(--pixel-font)',
+            }}>
+              {currentIdx + 1} / {frames.length}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* FPS controls */}
-      <div style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <span style={{ fontSize: 11, fontWeight: 'bold', color: '#6A6A5A', textTransform: 'uppercase', letterSpacing: '0.06em', marginRight: 4 }}>FPS</span>
-
+      {/* Controls */}
+      <div className="anim-controls">
         <button
+          className="px-btn sm"
+          onClick={() => setCurrentIdx(f => Math.max(0, f - 1))}
+        >
+          <FontAwesomeIcon icon={faBackward} />
+        </button>
+        <button
+          className={`px-btn sm ${isPlaying ? 'active' : ''}`}
           onClick={() => setIsPlaying(p => !p)}
-          className={isPlaying ? 'btn-pixel-active' : 'btn-pixel'}
-          style={{ width: 44, height: 44, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
         >
           <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
+          {' '}{isPlaying ? 'Pause' : 'Play'}
         </button>
+        <button
+          className="px-btn sm"
+          onClick={() => setCurrentIdx(f => (f + 1) % Math.max(1, frames.length))}
+        >
+          <FontAwesomeIcon icon={faForward} />
+        </button>
+        <div className="fps-label">
+          FPS:
+          {FPS_OPTIONS.map(f => (
+            <button
+              key={f}
+              onClick={() => onSetFps(f)}
+              className={`px-btn sm ${fps === f ? 'active' : ''}`}
+              style={{ padding: '4px 8px' }}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+      </div>
 
-        {FPS_OPTIONS.map(f => (
-          <button
-            key={f}
-            onClick={() => onSetFps(f)}
-            className={fps === f ? 'btn-pixel-active' : 'btn-pixel'}
-            style={{ width: 44, height: 44, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
-          >
-            {f}
-          </button>
-        ))}
+      {/* Status bar */}
+      <div className="status-bar">
+        <span>Mode: {isPlaying ? '▶ Playing' : '⏸ Paused'}</span>
+        <span>{fps} FPS</span>
+        <span>{totalMs}ms</span>
       </div>
     </div>
   )

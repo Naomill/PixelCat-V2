@@ -1,6 +1,4 @@
-import { T } from '../ui.js'
-
-const FRAME_SIZE = T.FRAME_SIZE
+const FRAME_SIZE = 400
 
 /**
  * Remove background by flood-filling from all 4 corners.
@@ -222,7 +220,7 @@ export function convertToPixelArt(img, pixelSize, numColors, { removeBg = false,
 
   // Fill background only when NOT removing it
   if (!removeBg) {
-    smallCtx.fillStyle = T.cream
+    smallCtx.fillStyle = '#F5F0E8'
     smallCtx.fillRect(0, 0, tileW, tileH)
   }
   smallCtx.drawImage(img, drawX, drawY, drawW, drawH)
@@ -249,7 +247,7 @@ export function convertToPixelArt(img, pixelSize, numColors, { removeBg = false,
 
   // Fill background only when NOT using transparency
   if (!removeBg) {
-    ctx.fillStyle = T.cream
+    ctx.fillStyle = '#F5F0E8'
     ctx.fillRect(0, 0, FRAME_SIZE, FRAME_SIZE)
   }
 
@@ -304,7 +302,7 @@ export function convertToSVG(img, pixelSize, numColors, { removeBg = false, bgTo
   }
 
   if (!removeBg) {
-    smallCtx.fillStyle = T.cream
+    smallCtx.fillStyle = '#F5F0E8'
     smallCtx.fillRect(0, 0, tileW, tileH)
   }
   smallCtx.drawImage(img, drawX, drawY, drawW, drawH)
@@ -345,7 +343,7 @@ export function convertToSVG(img, pixelSize, numColors, { removeBg = false, bgTo
   const parts = [`<svg xmlns="http://www.w3.org/2000/svg" width="${svgW}" height="${svgH}" shape-rendering="crispEdges">`]
 
   if (!removeBg) {
-    parts.push(`<rect width="${svgW}" height="${svgH}" fill="${T.cream}"/>`)
+    parts.push(`<rect width="${svgW}" height="${svgH}" fill="${'#F5F0E8'}"/>`)
   }
 
   for (let y = 0; y < tileH; y++) {

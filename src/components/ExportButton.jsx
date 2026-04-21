@@ -1,10 +1,8 @@
 import { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faDownload } from '@fortawesome/free-solid-svg-icons'
-import { T } from '../ui.js'
 
-const FRAME_SIZE = T.FRAME_SIZE
-const BTN_BLUE = '#3550C4'
+const FRAME_SIZE = 400
 
 export default function ExportButton({ frames, fps }) {
   const [isExporting, setIsExporting] = useState(false)
@@ -81,34 +79,25 @@ export default function ExportButton({ frames, fps }) {
   const disabled = frames.length === 0 || isExporting
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, width: '100%' }}>
       <button
         onClick={handleExport}
         disabled={disabled}
-        className="btn-pixel-primary"
-        style={{
-          width: '100%',
-          padding: '10px 12px',
-          fontSize: 13,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 6,
-        }}
+        className="px-btn success"
+        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
       >
-        <FontAwesomeIcon icon={faDownload} /> {isExporting ? `Encoding… ${progress}%` : `Export GIF`}
+        <FontAwesomeIcon icon={faDownload} />
+        {isExporting ? `Encoding… ${progress}%` : `Export GIF (${frames.length}f)`}
       </button>
 
       {isExporting && (
-        <div style={{ width: '100%', height: 6, background: '#E0DCCC', border: '1px solid #C8C4B8', overflow: 'hidden' }}>
-          <div style={{ height: '100%', width: `${progress}%`, background: BTN_BLUE, transition: 'width 0.2s' }} />
+        <div style={{ width: '100%', height: 6, background: 'var(--settings-border)', border: '1px solid var(--upload-border)', overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: `${progress}%`, background: '#2a7a2a', transition: 'width 0.2s' }} />
         </div>
       )}
 
       {error && (
-        <div style={{ fontSize: 11, color: '#CC2222', border: '1px solid #FFAAAA', background: '#FFF0F0', padding: '3px 6px' }}>
-          {error}
-        </div>
+        <div className="error-msg">{error}</div>
       )}
     </div>
   )
